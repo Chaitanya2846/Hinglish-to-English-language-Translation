@@ -315,7 +315,6 @@ def main():
         fp16=(device == "cuda"),
         logging_steps=50,
         report_to="none",
-        warmup_ratio=0.05,
         optim="adamw_torch",
         remove_unused_columns=False,
     )
