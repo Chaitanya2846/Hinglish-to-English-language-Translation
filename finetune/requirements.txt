@@ -1,11 +1,9 @@
-# Fine-tuning Requirements for GPU Laptop
-# Install these in a fresh venv on the GPU laptop
-
+# Fine-tuning & Evaluation Requirements
 torch>=2.0.0
-transformers>=4.33.0
+transformers>=4.38.0
 datasets>=2.14.0
-accelerate>=0.24.0
-peft>=0.6.0
+accelerate>=0.27.0
+peft>=0.12.0
 bitsandbytes>=0.41.0
 sentencepiece>=0.1.99
 protobuf>=3.20.0
@@ -13,5 +11,5 @@ sacrebleu>=2.3.0
 sacremoses>=0.0.53
 evaluate>=0.4.0
 bert-score>=0.3.13
-tensorboard>=2.14.0
 tqdm>=4.66.0
+python-dotenv>=1.0.0
