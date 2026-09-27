@@ -35,6 +35,7 @@ OUTPUT_DIR = SCRIPT_DIR / "outputs" / "rlm_hinglish_lora"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 TRAIN_FILE = DATA_DIR / "phinc_train.jsonl"
+EXTRA_TRAIN_FILE = DATA_DIR / "extra_train.jsonl"
 VAL_FILE   = DATA_DIR / "phinc_val.jsonl"
 EVAL_FILE  = DATA_DIR / "youtube_eval_gold.jsonl"
 
@@ -43,7 +44,7 @@ PROMPT_TEMPLATE = "Hinglish:\n{source}\n\nEnglish:\n{target}"
 INFERENCE_TEMPLATE = "Hinglish:\n{source}\n\nEnglish:\n"
 
 # Training Hyperparameters optimized for 6GB RTX 3050
-NUM_EPOCHS = 2
+NUM_EPOCHS = 5
 BATCH_SIZE = 4
 GRAD_ACCUM_STEPS = 4  # Effective batch size = 16
 LEARNING_RATE = 2e-4
@@ -230,10 +231,14 @@ def main():
     # 1. Load Data
     print("\n[1/5] Loading datasets...")
     train_data = load_jsonl(TRAIN_FILE)
+    if EXTRA_TRAIN_FILE.exists():
+        extra_data = load_jsonl(EXTRA_TRAIN_FILE)
+        print(f"  Extra : {len(extra_data):,} pairs ({EXTRA_TRAIN_FILE.name})")
+        train_data.extend(extra_data)
     val_data   = load_jsonl(VAL_FILE)
     eval_data  = load_jsonl(EVAL_FILE) if EVAL_FILE.exists() else []
 
-    print(f"  Train : {len(train_data):,} pairs ({TRAIN_FILE.name})")
+    print(f"  Train : {len(train_data):,} pairs (total)")
     print(f"  Val   : {len(val_data):,} pairs ({VAL_FILE.name})")
     print(f"  Eval  : {len(eval_data):,} pairs ({EVAL_FILE.name})")
 
