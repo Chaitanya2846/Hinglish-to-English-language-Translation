@@ -1,9 +1,7 @@
 """
-evaluate_model.py — Evaluate Hinglish Translation Model with BLEU / chrF
-========================================================================
-Evaluates either the base RLM model or the fine-tuned LoRA adapter on
-the held-out YouTube Gold evaluation set.
-
+evaluate_model.py -- Evaluate Hinglish Translation Model (Extended)
+====================================================================
+Metrics: BLEU, chrF++, BERTScore F1, Inference Latency
 Usage:
     python evaluate_model.py
 """
@@ -16,7 +14,6 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
-# Force UTF-8 output on Windows
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
 
@@ -25,11 +22,10 @@ DATA_DIR = BASE_DIR / "data"
 EVAL_FILE = DATA_DIR / "youtube_eval_gold.jsonl"
 ADAPTER_PATH = BASE_DIR / "outputs" / "rlm_hinglish_lora"
 BASE_MODEL_NAME = "rudrashah/RLM-hinglish-translator"
-
 INFERENCE_TEMPLATE = "Hinglish:\n{source}\n\nEnglish:\n"
 
 
-def load_eval_data(path: Path):
+def load_eval_data(path):
     data = []
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
@@ -40,136 +36,154 @@ def load_eval_data(path: Path):
             src = item.get("source", "").strip()
             tgt = item.get("target", "").strip()
             if src and tgt:
-                data.append({"id": item.get("id", len(data) + 1), "source": src, "target": tgt})
+                data.append({"id": item.get("id", len(data)+1), "source": src, "target": tgt})
     return data
 
 
+def generate_translation(model, tokenizer, source, device):
+    prompt = INFERENCE_TEMPLATE.format(source=source)
+    inputs = tokenizer(prompt, return_tensors="pt")
+    if device == "cuda":
+        input_device = model.get_input_embeddings().weight.device
+        inputs = {k: v.to(input_device) for k, v in inputs.items()}
+    t0 = time.perf_counter()
+    with torch.no_grad():
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=64,
+            do_sample=False,
+            pad_token_id=tokenizer.eos_token_id,
+        )
+    latency_ms = (time.perf_counter() - t0) * 1000
+    full_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    if "English:\n" in full_output:
+        pred = full_output.split("English:\n")[-1].strip()
+    else:
+        pred = full_output.replace(prompt, "").strip()
+    return pred.split("\n")[0].strip(), latency_ms
+
+
+def print_qualitative_table(eval_data, predictions):
+    sep = "=" * 65
+    dash = "-" * 63
+    print("\n" + sep)
+    print("  QUALITATIVE COMPARISON (first 10 samples)")
+    print(sep)
+    for i, (item, pred) in enumerate(zip(eval_data[:10], predictions[:10])):
+        print("")
+        print("  [" + str(i+1) + "] Source    : " + item["source"])
+        print("      Reference : " + item["target"])
+        print("      Predicted : " + pred)
+        print("  " + dash)
+
+
 def main():
-    print("=" * 65)
-    print("  Hinglish -> English Model Evaluation")
-    print("=" * 65)
-
+    sep = "=" * 65
+    print(sep)
+    print("  Hinglish -> English Evaluation (Extended)")
+    print(sep)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"Device: {device.upper()}")
+    print("Device: " + device.upper())
 
-    # 1. Load Tokenizer & Model
-    print(f"\nLoading Tokenizer for {BASE_MODEL_NAME}...")
+    print("\nLoading tokenizer for " + BASE_MODEL_NAME + "...")
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_NAME)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
-    print(f"Loading Base Model...")
+    print("Loading base model...")
     model = AutoModelForCausalLM.from_pretrained(
         BASE_MODEL_NAME,
         torch_dtype=torch.float16 if device == "cuda" else torch.float32,
         device_map="auto" if device == "cuda" else None,
     )
 
-    # 2. Check for LoRA Adapter
     if ADAPTER_PATH.exists() and (ADAPTER_PATH / "adapter_config.json").exists():
-        print(f"\n[+] Found fine-tuned LoRA adapter at: {ADAPTER_PATH}")
-        print("    Loading adapter weights on top of base model...")
+        print("\n[+] LoRA adapter found. Loading...")
         model = PeftModel.from_pretrained(model, str(ADAPTER_PATH))
-        eval_label = "Fine-Tuned Model (RLM + Custom LoRA)"
+        eval_label = "Fine-Tuned (RLM + Custom QLoRA)"
     else:
-        print(f"\n[-] No LoRA adapter found at {ADAPTER_PATH}")
-        print("    Evaluating BASE model out-of-the-box...")
+        print("\n[-] No adapter found. Evaluating base model.")
         eval_label = "Base Model (rudrashah/RLM-hinglish-translator)"
 
     model.eval()
 
-    # 3. Load Evaluation Data
     if not EVAL_FILE.exists():
-        print(f"ERROR: Eval file not found: {EVAL_FILE}")
+        print("ERROR: " + str(EVAL_FILE) + " not found")
         return
 
     eval_data = load_eval_data(EVAL_FILE)
-    print(f"\nLoaded {len(eval_data)} gold pairs from {EVAL_FILE.name}")
+    print("\nLoaded " + str(len(eval_data)) + " gold pairs from " + EVAL_FILE.name)
 
-    print("\n" + "=" * 65)
-    print(f"  RUNNING INFERENCE ({eval_label})")
-    print("=" * 65)
-
-    predictions = []
-    references = []
-    t_start = time.time()
-
+    predictions, references, latencies = [], [], []
     for idx, item in enumerate(eval_data):
-        src = item["source"]
-        ref = item["target"]
-        prompt = INFERENCE_TEMPLATE.format(source=src)
-
-        inputs = tokenizer(prompt, return_tensors="pt")
-
-        if device == "cuda":
-            # Put inputs on the device where the model's input embeddings live.
-            input_device = model.get_input_embeddings().weight.device
-            inputs = {k: v.to(input_device) for k, v in inputs.items()}
-
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=64,
-                do_sample=False,
-                pad_token_id=tokenizer.eos_token_id,
-            )
-
-        full_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        if "English:\n" in full_output:
-            pred = full_output.split("English:\n")[-1].strip()
-        else:
-            pred = full_output.replace(prompt, "").strip()
-
-        # Clean single trailing artifact if present
-        pred = pred.split("\n")[0].strip()
-
+        pred, lat = generate_translation(model, tokenizer, item["source"], device)
         predictions.append(pred)
-        references.append(ref)
+        references.append(item["target"])
+        latencies.append(lat)
+        if idx < 5:
+            print("[" + str(idx+1) + "] " + item["source"] + " -> " + pred)
 
-        if idx < 6:
-            print(f"[{idx+1}/{len(eval_data)}]")
-            print(f"  Source : {src}")
-            print(f"  Target : {ref}")
-            print(f"  Output : {pred}")
-            print("-" * 40)
+    avg_lat = sum(latencies) / len(latencies)
+    total_s = sum(latencies) / 1000
+    print("\nInference: " + str(round(total_s, 1)) + "s total | " + str(round(avg_lat)) + " ms/sentence")
 
-    elapsed = time.time() - t_start
-    print(f"\nInference completed in {elapsed:.1f}s ({elapsed/len(eval_data):.2f}s per sentence)")
+    bleu_score = chrf_score = bertscore_f1 = None
 
-    # 4. Compute Metrics
     try:
         import sacrebleu
-        bleu = sacrebleu.corpus_bleu(predictions, [[r] for r in references])
-        chrf = sacrebleu.corpus_chrf(predictions, [[r] for r in references])
-
-        print("\n" + "=" * 65)
-        print("  EVALUATION RESULTS")
-        print("=" * 65)
-        print(f"  Model Evaluated : {eval_label}")
-        print(f"  Corpus BLEU     : {bleu.score:.2f}")
-        print(f"  chrF++ Score    : {chrf.score:.2f}")
-        print("=" * 65)
-
-        # Save to file
-        out_file = BASE_DIR / "outputs" / "evaluation_report.json"
-        out_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(out_file, "w", encoding="utf-8") as f:
-            json.dump({
-                "model": eval_label,
-                "dataset": EVAL_FILE.name,
-                "num_samples": len(eval_data),
-                "bleu": round(bleu.score, 2),
-                "chrf": round(chrf.score, 2),
-                "time_seconds": round(elapsed, 2),
-                "samples": [
-                    {"id": eval_data[i]["id"], "source": eval_data[i]["source"], "reference": references[i], "prediction": predictions[i]}
-                    for i in range(len(eval_data))
-                ]
-            }, f, indent=2)
-        print(f"\nDetailed evaluation report saved to: {out_file}")
-
+        bleu_score = round(sacrebleu.corpus_bleu(predictions, [[r] for r in references]).score, 2)
+        chrf_score = round(sacrebleu.corpus_chrf(predictions, [[r] for r in references]).score, 2)
+        print("BLEU: " + str(bleu_score) + "  |  chrF: " + str(chrf_score))
     except ImportError:
-        print("\nInstall sacrebleu (`pip install sacrebleu`) to compute automatic BLEU/chrF metrics.")
+        print("[!] pip install sacrebleu")
+
+    try:
+        from bert_score import score as bscore
+        print("\nComputing BERTScore (may take ~1 min on CPU)...")
+        _, _, F1 = bscore(predictions, references, lang="en", rescale_with_baseline=True, verbose=False)
+        bertscore_f1 = round(F1.mean().item(), 4)
+        print("BERTScore F1: " + str(bertscore_f1))
+    except ImportError:
+        print("[!] pip install bert-score")
+
+    print_qualitative_table(eval_data, predictions)
+
+    print("\n" + sep)
+    print("  FINAL SUMMARY")
+    print(sep)
+    print("  Model        : " + eval_label)
+    print("  Samples      : " + str(len(eval_data)))
+    if bleu_score   is not None: print("  BLEU         : " + str(bleu_score))
+    if chrf_score   is not None: print("  chrF++       : " + str(chrf_score))
+    if bertscore_f1 is not None: print("  BERTScore F1 : " + str(bertscore_f1))
+    print("  Avg Latency  : " + str(round(avg_lat)) + " ms/sentence")
+    print("  Device       : " + device.upper())
+    print(sep)
+
+    out = BASE_DIR / "outputs" / "evaluation_report.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump({
+            "model": eval_label,
+            "dataset": EVAL_FILE.name,
+            "num_samples": len(eval_data),
+            "bleu": bleu_score,
+            "chrf": chrf_score,
+            "bertscore_f1": bertscore_f1,
+            "avg_latency_ms": round(avg_lat, 1),
+            "device": device,
+            "samples": [
+                {
+                    "id": eval_data[i]["id"],
+                    "source": eval_data[i]["source"],
+                    "reference": references[i],
+                    "prediction": predictions[i],
+                    "latency_ms": round(latencies[i], 1),
+                }
+                for i in range(len(eval_data))
+            ],
+        }, f, indent=2, ensure_ascii=False)
+    print("\nFull report saved -> " + str(out))
 
 
 if __name__ == "__main__":
