@@ -60,7 +60,7 @@ def generate_translation(model, tokenizer, source, device):
         pred = full_output.split("English:\n")[-1].strip()
     else:
         pred = full_output.replace(prompt, "").strip()
-    return pred.split("\n")[0].strip(), latency_ms
+    return pred.strip(), latency_ms
 
 
 def print_qualitative_table(eval_data, predictions):
