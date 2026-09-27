@@ -15,8 +15,6 @@ import html
 import re
 from typing import Dict, List
 
-import spacy
-
 
 MARKERS_PATH = r"C:\Users\User\Desktop\NLP\data\roman_hindi_markers.json"
 
