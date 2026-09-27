@@ -339,25 +339,42 @@ def main():
 
     # 5. Trainer Configuration (3 Epochs with Cosine Warmup)
     print(f"\n[5/5] Configuring Trainer for {NUM_EPOCHS} epochs with Cosine Annealing...")
-    training_args = TrainingArguments(
-        output_dir=str(OUTPUT_DIR / "checkpoints"),
-        num_train_epochs=NUM_EPOCHS,
-        per_device_train_batch_size=BATCH_SIZE,
-        gradient_accumulation_steps=GRAD_ACCUM_STEPS,
-        eval_strategy="steps",
-        eval_steps=150,
-        save_steps=150,
-        save_total_limit=2,
-        learning_rate=LEARNING_RATE,
-        lr_scheduler_type="cosine",
-        warmup_ratio=WARMUP_RATIO,
-        weight_decay=WEIGHT_DECAY,
-        fp16=(device == "cuda"),
-        logging_steps=25,
-        report_to="none",
-        optim="adamw_torch",
-        remove_unused_columns=False,
-    )
+    import inspect
+    sig = inspect.signature(TrainingArguments.__init__).parameters
+
+    args_dict = {
+        "output_dir": str(OUTPUT_DIR / "checkpoints"),
+        "num_train_epochs": NUM_EPOCHS,
+        "per_device_train_batch_size": BATCH_SIZE,
+        "gradient_accumulation_steps": GRAD_ACCUM_STEPS,
+        "eval_steps": 150,
+        "save_steps": 150,
+        "save_total_limit": 2,
+        "learning_rate": LEARNING_RATE,
+        "fp16": (device == "cuda"),
+        "logging_steps": 25,
+        "report_to": "none",
+        "optim": "adamw_torch",
+        "remove_unused_columns": False,
+    }
+
+    if "eval_strategy" in sig:
+        args_dict["eval_strategy"] = "steps"
+    elif "evaluation_strategy" in sig:
+        args_dict["evaluation_strategy"] = "steps"
+
+    if "lr_scheduler_type" in sig:
+        args_dict["lr_scheduler_type"] = "cosine"
+
+    if "weight_decay" in sig:
+        args_dict["weight_decay"] = WEIGHT_DECAY
+
+    if "warmup_steps" in sig:
+        args_dict["warmup_steps"] = 100
+    elif "warmup_ratio" in sig:
+        args_dict["warmup_ratio"] = 0.10
+
+    training_args = TrainingArguments(**args_dict)
 
     trainer = Trainer(
         model=model,
