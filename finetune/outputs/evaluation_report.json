@@ -1,184 +1,215 @@
 {
-  "model": "Fine-Tuned Model (RLM + Custom LoRA)",
+  "model": "Fine-Tuned (RLM + Custom QLoRA)",
   "dataset": "youtube_eval_gold.jsonl",
   "num_samples": 29,
-  "bleu": 12.7,
-  "chrf": 25.72,
-  "time_seconds": 241.18,
+  "bleu": 11.51,
+  "chrf": 33.66,
+  "bertscore_f1": 0.5484,
+  "avg_latency_ms": 849.5,
+  "device": "cuda",
   "samples": [
     {
       "id": 1,
       "source": "Koi Nhi Bodega Scripted hai",
-      "reference": "Nobody's going to get it \u2014 it's scripted.",
-      "prediction": "no one is bodega scripted"
+      "reference": "No one will say, it is scripted.",
+      "prediction": "no one is bodega scripted",
+      "latency_ms": 1656.8
     },
     {
       "id": 2,
       "source": "Sirf Khan sir ki jaayega",
-      "reference": "Only Khan sir's crowd will get it.",
-      "prediction": "only khan sir will go"
+      "reference": "Only Khan sir will go.",
+      "prediction": "only khan sir will go",
+      "latency_ms": 359.6
     },
     {
       "id": 3,
       "source": "Woh din bhi kya din the",
-      "reference": "Those were such good days.",
-      "prediction": "those days were also good days."
+      "reference": "Those days were also good days.",
+      "prediction": "those days were also good days.",
+      "latency_ms": 436.9
     },
     {
       "id": 4,
       "source": "Sir aap bahut achha padhte hu",
-      "reference": "Sir, you teach really well.",
-      "prediction": "sir i am a good student"
+      "reference": "Sir, you teach very well.",
+      "prediction": "sir i am a good student",
+      "latency_ms": 392.9
     },
     {
       "id": 5,
       "source": "Kon kon aaj dekh rha hai",
-      "reference": "Who's watching today?",
-      "prediction": "who all are watching today"
+      "reference": "Who all are watching today?",
+      "prediction": "who all are watching today",
+      "latency_ms": 330.6
     },
     {
       "id": 6,
       "source": "6 36 tiktok giraya hai mene",
-      "reference": "I brought down 636 TikTok videos myself.",
-      "prediction": "i have uploaded tiktok at 6:36"
+      "reference": "I have taken down 636 TikTok.",
+      "prediction": "i have uploaded tiktok at 6:36",
+      "latency_ms": 787.8
     },
     {
       "id": 7,
       "source": "Ashish Bhai missing your comedy videos",
-      "reference": "Ashish bhai, missing your comedy videos.",
-      "prediction": "Ashish brother missing your comedy videos"
+      "reference": "Ashish brother, missing your comedy videos.",
+      "prediction": "Ashish brother missing your comedy videos",
+      "latency_ms": 539.8
     },
     {
       "id": 9,
       "source": "Bhai wo din kitne suhane the",
-      "reference": "Bro, those days were so pleasant.",
-      "prediction": "brother how many hours were there that day"
+      "reference": "Brother, those days were so pleasant.",
+      "prediction": "brother how many hours were there that day",
+      "latency_ms": 662.2
     },
     {
       "id": 10,
       "source": "36 Years old year old ki hongi",
-      "reference": "She must be around 36 years old.",
-      "prediction": "it will be 36 years old"
+      "reference": "She will be 36 years old.",
+      "prediction": "it will be 36 years old",
+      "latency_ms": 737.8
     },
     {
       "id": 11,
       "source": "Bro pronunciation hi galat pronounce kar raha he",
-      "reference": "Bro, even the pronunciation is wrong.",
-      "prediction": "bro, you are pronouncing wrong."
+      "reference": "Bro, you are pronouncing it wrong.",
+      "prediction": "bro, you are pronouncing wrong.",
+      "latency_ms": 428.8
     },
     {
       "id": 12,
       "source": "Sar Mai neet ki taiyari karna chahti hu",
       "reference": "Sir, I want to prepare for NEET.",
-      "prediction": "i want to prepare for the exam"
+      "prediction": "i want to prepare for the exam",
+      "latency_ms": 429.6
     },
     {
       "id": 13,
       "source": "Are yaar isme limite hai free usase ki",
-      "reference": "Hey, is there a limit on the free version of this?",
-      "prediction": "hey friend, there is a limit in this, free for you."
+      "reference": "Hey friend, there is a limit in this for free use.",
+      "prediction": "hey friend, there is a limit in this, free for you.",
+      "latency_ms": 821.6
     },
     {
       "id": 14,
       "source": "Piyush ko bhi dikha do yrr video me",
-      "reference": "Show this video to Piyush too.",
-      "prediction": "show piyush in the video too"
+      "reference": "Show Piyush in the video too.",
+      "prediction": "show piyush in the video too",
+      "latency_ms": 547.0
     },
     {
       "id": 15,
       "source": "Sir me bhi apki class join karna chahati hu",
       "reference": "Sir, I also want to join your class.",
-      "prediction": "Sir, I also want to join your class."
+      "prediction": "Sir, I also want to join your class.",
+      "latency_ms": 597.0
     },
     {
       "id": 16,
       "source": "3 36 chal be panch foot ke baune was epic",
-      "reference": "Come on, epic \u2014 five-foot dwarf.",
-      "prediction": "3 36 go panch foot baune was epic"
+      "reference": "Go, five foot dwarf, that was epic.",
+      "prediction": "3 36 go panch foot baune was epic",
+      "latency_ms": 706.9
     },
     {
       "id": 17,
       "source": "Btw bro Navasi 89 hota hai aur 79 unyasi hota h",
-      "reference": "Btw bro, 89 is \"navasi\" and 79 is \"unyasi.\"",
-      "prediction": "btw bro navasi is 89 and 79 is my score"
+      "reference": "Btw bro, navasi is 89 and 79 is unyasi.",
+      "prediction": "btw bro navasi is 89 and 79 is my score",
+      "latency_ms": 865.5
     },
     {
       "id": 18,
       "source": "17 18 19 20 physics Walah ko de sab log kiss",
-      "reference": "Give it to Physics Wallah, everyone \u2014 kiss.",
-      "prediction": "give kisses to all the 17 18 19 20 physics students"
+      "reference": "Give kisses to Physics Wallah, everyone.",
+      "prediction": "give kisses to all the 17 18 19 20 physics students",
+      "latency_ms": 1071.7
     },
     {
       "id": 19,
       "source": "Bnna hai to Dr engineer bno isa me kya rakha hai",
-      "reference": "If you want to become something, become a doctor or engineer \u2014 what's the point otherwise?",
-      "prediction": "if you want then put it in a doctor engineer"
+      "reference": "If you want to become something, become a doctor or engineer, what is in this?",
+      "prediction": "if you want then put it in a doctor engineer",
+      "latency_ms": 591.9
     },
     {
       "id": 20,
       "source": "Par Adarsh Ki ja to me lipta Parivar to yaha hai",
-      "reference": "But Adarsh's family is attached here too.",
-      "prediction": "but if we go to the family of adarsh then we are a family here."
+      "reference": "But Adarsh's family is attached here.",
+      "prediction": "but if we go to the family of adarsh then we are a family here.",
+      "latency_ms": 973.0
     },
     {
       "id": 21,
-      "source": "\u091f\u0940 \u0936\u0930\u094d\u091f \u091a\u093e\u0939\u093f\u090f \u0915\u093f\u0938\u0940 \u0915\u0940 \u092d\u0940 \u0939\u094b \u0926\u093f\u0932 \u0924\u094b PW ka hai",
-      "reference": "I want a T-shirt, doesn't matter whose \u2014 my heart is with PW.",
-      "prediction": "i need a tshirt of someone else's heart, i have a heart for everyone"
+      "source": "टी शर्ट चाहिए किसी की भी हो दिल तो PW ka hai",
+      "reference": "I want a t-shirt, anyone's will do, my heart is with PW.",
+      "prediction": "i need a tshirt of someone else's heart, my heart belongs to someone else.",
+      "latency_ms": 1030.9
     },
     {
       "id": 22,
       "source": "Upsc Mains me jeans me ladki jarhi shirt me kuch bhi video",
-      "reference": "In UPSC Mains, a girl wearing jeans and a shirt \u2014 whatever, it's just a video.",
-      "prediction": "in upsc mains, a girl jumps in jeans and a boy jumps in shirt in video"
+      "reference": "In UPSC Mains, a girl in jeans and shirt, anything in the video.",
+      "prediction": "in upsc mains, a girl jumps in jeans and a boy jumps in shirt in video",
+      "latency_ms": 1050.2
     },
     {
       "id": 23,
       "source": "Mai ek baar try ki thi same aise hi exam mein ki sahi ho gya",
-      "reference": "I tried it once, same as this, in the exam, and it went well.",
-      "prediction": "i tried once before and it went well in the exam."
+      "reference": "I tried once before and it went well in the exam.",
+      "prediction": "i tried once before and it went well in the exam.",
+      "latency_ms": 725.4
     },
     {
       "id": 24,
       "source": "Ab to jamin a jana chahiye 2026 ho gaya aur kitna din girta hi rahoge",
-      "reference": "It should've hit rock bottom by now \u2014 it's 2026, how much longer will it keep falling?",
-      "prediction": "now we should go to sleep 2026 has passed and how many days will you keep on passing"
+      "reference": "Now you should come down, 2026 has come and how many more days will you keep falling?",
+      "prediction": "now we should go to sleep 2026 has passed and how many days will you keep on passing",
+      "latency_ms": 1637.2
     },
     {
       "id": 25,
       "source": "rupali 2 song launch kar ek special dedication deni hai kafi personal ho gya h matter",
-      "reference": "Launch the Rupali 2 song, give a special dedication \u2014 it's become quite a personal matter.",
-      "prediction": "i want to launch 2 songs on rupali's birthday, it's too personal now."
+      "reference": "Launch Rupali 2 song, have to give a special dedication, the matter has become quite personal.",
+      "prediction": "i want to launch 2 songs on rupali's birthday, it's too personal now.",
+      "latency_ms": 1447.1
     },
     {
       "id": 26,
       "source": "Sir 80% karne ke liye minimum kitna time padhna chahie 10th me please sir take my question",
-      "reference": "Sir, how much minimum time should I study daily to get 80% in 10th? Please take my question.",
-      "prediction": "sir to do 80% of the work, how much time is required in 10th standard please sir take my question"
+      "reference": "Sir, to get 80% how much minimum time should I study in 10th, please sir take my question.",
+      "prediction": "sir to do 80% of the work, how much time is required in 10th standard please sir take my question",
+      "latency_ms": 1510.1
     },
     {
       "id": 27,
       "source": "Mam kya hindi medium sa chemistry optional select kara tho optional ka paper english ma lekha saktha h kya",
-      "reference": "Ma'am, if I choose chemistry as an optional with Hindi medium, can I write the optional paper in English?",
-      "prediction": "mam, did you select chemistry optional in hindi medium? can you take english paper in optional?"
+      "reference": "Mam, if I select chemistry optional from Hindi medium, can I write the optional paper in English?",
+      "prediction": "mam, did you select chemistry optional in hindi medium? can you take english paper in optional?",
+      "latency_ms": 1079.1
     },
     {
       "id": 28,
       "source": "Happy birthday Bhai God bless you with happiness and All your dream come true and healthy life hamesha khush raho",
-      "reference": "Happy birthday bro, God bless you with happiness, may all your dreams come true, and stay healthy and happy always.",
-      "prediction": "happy birthday brother god bless you with happiness and all your dreams come true and live a healthy life always"
+      "reference": "Happy birthday brother, God bless you with happiness and all your dreams come true and live a healthy life, always stay happy.",
+      "prediction": "happy birthday brother god bless you with happiness and all your dreams come true and live a healthy life always",
+      "latency_ms": 1150.5
     },
     {
       "id": 29,
       "source": "\"Bolo aapko screenshot ke naam ka rent du sir\" Which scene was your favourite Comment below now Download like app",
-      "reference": "\"Tell me, should I pay you rent for the screenshot, sir?\" \u2014 Which scene was your favourite? Comment below, download, and like the app.",
-      "prediction": "\"tell you rent the screenshot name sir\" which scene was your favourite comment below now download like app"
+      "reference": "\"Tell me, should I give you rent for the screenshot sir\" Which scene was your favourite, comment below, now download and like the app.",
+      "prediction": "\"tell you rent the screenshot name sir\" which scene was your favourite comment below now download like app",
+      "latency_ms": 1137.4
     },
     {
       "id": 30,
       "source": "Yaar main rice khate hue dekh rahi thi aur Mera mood kharab ho gaya dusron ko khate hue dekh kar",
-      "reference": "Yaar, I was watching someone eat rice and it put me in a bad mood, seeing others eat.",
-      "prediction": "dude i was watching people eating rice and my mood got bad seeing people eating rice"
+      "reference": "Dude, I was watching people eating rice and my mood got bad seeing others eating.",
+      "prediction": "dude i was watching people eating rice and my mood got bad seeing people eating rice",
+      "latency_ms": 930.9
     }
   ]
 }
