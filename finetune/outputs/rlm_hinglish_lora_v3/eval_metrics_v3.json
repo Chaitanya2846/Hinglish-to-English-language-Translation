@@ -1,0 +1,13 @@
+{
+  "validation": {
+    "BLEU": 0.0,
+    "chrF++": 8.13,
+    "ROUGE-1": 39.17,
+    "ROUGE-2": 19.72,
+    "ROUGE-L": 36.79,
+    "METEOR": 36.95,
+    "BERTScore_F1": 0.8781,
+    "Latency_ms": 1377.5,
+    "samples": 200
+  }
+}
