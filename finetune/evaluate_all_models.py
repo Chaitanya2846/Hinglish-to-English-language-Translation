@@ -137,7 +137,13 @@ def evaluate_causal_model(config: dict, val_pairs: List[Dict], device: str) -> T
     model = AutoModelForCausalLM.from_pretrained(config["base"], quantization_config=bnb_config,
         device_map="auto", torch_dtype=torch.float16, trust_remote_code=True)
 
-    adapter_path = config["adapter"]
+    adapter_path = Path(config["adapter"])
+    if not (adapter_path / "adapter_config.json").exists():
+        chk_dirs = sorted((adapter_path / "checkpoints").glob("checkpoint-*"), key=lambda p: int(p.name.split("-")[-1]) if p.name.split("-")[-1].isdigit() else 0)
+        if chk_dirs:
+            adapter_path = chk_dirs[-1]
+            print(f"  [+] Found checkpoint adapter: {adapter_path}")
+
     if adapter_path.exists() and (adapter_path / "adapter_config.json").exists():
         model = PeftModel.from_pretrained(model, str(adapter_path))
         print(f"  [+] Loaded LoRA adapter from {adapter_path}")
@@ -181,7 +187,13 @@ def evaluate_seq2seq_model(config: dict, val_pairs: List[Dict], device: str) -> 
     tokenizer = AutoTokenizer.from_pretrained(config["base"])
     model = AutoModelForSeq2SeqLM.from_pretrained(config["base"], torch_dtype=torch.float32)
 
-    adapter_path = config["adapter"]
+    adapter_path = Path(config["adapter"])
+    if not (adapter_path / "adapter_config.json").exists():
+        chk_dirs = sorted((adapter_path / "checkpoints").glob("checkpoint-*"), key=lambda p: int(p.name.split("-")[-1]) if p.name.split("-")[-1].isdigit() else 0)
+        if chk_dirs:
+            adapter_path = chk_dirs[-1]
+            print(f"  [+] Found checkpoint adapter: {adapter_path}")
+
     if adapter_path.exists() and (adapter_path / "adapter_config.json").exists():
         model = PeftModel.from_pretrained(model, str(adapter_path))
         print(f"  [+] Loaded LoRA adapter from {adapter_path}")
