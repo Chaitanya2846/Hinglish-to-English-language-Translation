@@ -60,13 +60,12 @@ MODELS = {
         "extract_key": "English:",
         "num_beams": 4,
     },
-    "Meta NLLB-200 (LoRA)": {
-        "type": "seq2seq",
-        "base": "facebook/nllb-200-distilled-600M",
-        "adapter": SCRIPT_DIR / "outputs" / "nllb_hinglish_lora",
-        "src_lang": "hin_Deva",
-        "tgt_lang": "eng_Latn",
-        "num_beams": 4,
+    "mT5-Small (LoRA)": {
+        "type": "seq2seq_mt5",
+        "base": "google/mt5-small",
+        "adapter": SCRIPT_DIR / "outputs" / "mt5_hinglish_lora",
+        "prefix": "translate Hinglish to English: ",
+        "num_beams": 5,
     },
 }
 
@@ -179,8 +178,8 @@ def evaluate_seq2seq_model(config: dict, val_pairs: List[Dict], device: str) -> 
     from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
     from peft import PeftModel
 
-    tokenizer = AutoTokenizer.from_pretrained(config["base"], src_lang=config["src_lang"], tgt_lang=config["tgt_lang"])
-    model = AutoModelForSeq2SeqLM.from_pretrained(config["base"], torch_dtype=torch.float16)
+    tokenizer = AutoTokenizer.from_pretrained(config["base"])
+    model = AutoModelForSeq2SeqLM.from_pretrained(config["base"], torch_dtype=torch.float32)
 
     adapter_path = config["adapter"]
     if adapter_path.exists() and (adapter_path / "adapter_config.json").exists():
@@ -193,17 +192,18 @@ def evaluate_seq2seq_model(config: dict, val_pairs: List[Dict], device: str) -> 
         model = model.cuda()
     model.eval()
 
-    forced_bos_id = tokenizer.convert_tokens_to_ids(config["tgt_lang"])
+    prefix = config.get("prefix", "")
     predictions, references, latencies = [], [], []
 
     for i, item in enumerate(val_pairs):
-        inputs = tokenizer(item["source"], return_tensors="pt", max_length=128, truncation=True)
+        input_text = prefix + item["source"]
+        inputs = tokenizer(input_text, return_tensors="pt", max_length=128, truncation=True)
         if device == "cuda":
             inputs = {k: v.cuda() for k, v in inputs.items()}
         t0 = time.time()
         with torch.no_grad():
             outputs = model.generate(**inputs, max_new_tokens=96, num_beams=config["num_beams"],
-                forced_bos_token_id=forced_bos_id, pad_token_id=tokenizer.pad_token_id)
+                length_penalty=1.0, no_repeat_ngram_size=3, early_stopping=True)
         latencies.append((time.time() - t0) * 1000)
         pred = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
         predictions.append(pred)
@@ -266,7 +266,7 @@ def main():
         try:
             if config["type"] == "causal":
                 metrics, _ = evaluate_causal_model(config, val_pairs, device)
-            else:
+            elif config["type"] in ("seq2seq", "seq2seq_mt5"):
                 metrics, _ = evaluate_seq2seq_model(config, val_pairs, device)
             all_results[model_name] = metrics
         except Exception as e:
