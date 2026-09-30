@@ -181,7 +181,8 @@ def main():
         "learning_rate": LEARNING_RATE,
         "logging_steps": 50,
         "save_strategy": "epoch",
-        "fp16": torch.cuda.is_available(),
+        "fp16": False,  # T5/mT5 RMSNorm overflows in FP16 (causing loss: 0, grad_norm: nan). Must use FP32!
+        "max_grad_norm": 1.0,
         "predict_with_generate": True,
         "generation_max_length": MAX_TARGET_LENGTH,
         "report_to": "none",
