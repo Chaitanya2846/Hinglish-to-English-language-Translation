@@ -52,6 +52,7 @@ models/*checkpoint*/
 **/optimizer.pt
 **/scheduler.pt
 **/trainer_state.json
+**/tokenizer.json
 
 # Archives
 *.zip
