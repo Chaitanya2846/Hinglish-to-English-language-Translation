@@ -123,9 +123,17 @@ def main():
 
     print("\n[3/5] Loading Model...")
     t0 = time.time()
+    model_kwargs = {}
+    import inspect as _ins
+    pt_sig = _ins.signature(AutoModelForSeq2SeqLM.from_pretrained).parameters
+    if "dtype" in pt_sig:
+        model_kwargs["dtype"] = torch.float32
+    else:
+        model_kwargs["torch_dtype"] = torch.float32
+
     model = AutoModelForSeq2SeqLM.from_pretrained(
         MODEL_ID,
-        torch_dtype=torch.float32,  # mT5-small fits in fp32 on T4 (~1.2 GB)
+        **model_kwargs,
     )
     if device == "cuda":
         model = model.cuda()
@@ -161,27 +169,47 @@ def main():
 
     # 4. Training
     print(f"\n[5/5] Training for {NUM_EPOCHS} epochs...")
-    training_args = Seq2SeqTrainingArguments(
-        output_dir=str(OUTPUT_DIR / "checkpoints"),
-        num_train_epochs=NUM_EPOCHS,
-        per_device_train_batch_size=BATCH_SIZE,
-        per_device_eval_batch_size=BATCH_SIZE,
-        gradient_accumulation_steps=GRAD_ACCUM,
-        learning_rate=LEARNING_RATE,
-        warmup_ratio=0.1,
-        weight_decay=0.01,
-        lr_scheduler_type="cosine",
-        logging_steps=50,
-        save_strategy="epoch",
-        eval_strategy="epoch",
-        fp16=torch.cuda.is_available(),
-        predict_with_generate=True,
-        generation_num_beams=NUM_BEAMS,
-        generation_max_length=MAX_TARGET_LENGTH,
-        report_to="none",
-        load_best_model_at_end=True,
-        metric_for_best_model="eval_loss",
-    )
+    import inspect
+    sig = inspect.signature(Seq2SeqTrainingArguments.__init__).parameters
+
+    args_dict = {
+        "output_dir": str(OUTPUT_DIR / "checkpoints"),
+        "num_train_epochs": NUM_EPOCHS,
+        "per_device_train_batch_size": BATCH_SIZE,
+        "per_device_eval_batch_size": BATCH_SIZE,
+        "gradient_accumulation_steps": GRAD_ACCUM,
+        "learning_rate": LEARNING_RATE,
+        "logging_steps": 50,
+        "save_strategy": "epoch",
+        "fp16": torch.cuda.is_available(),
+        "predict_with_generate": True,
+        "generation_max_length": MAX_TARGET_LENGTH,
+        "report_to": "none",
+        "load_best_model_at_end": True,
+        "metric_for_best_model": "eval_loss",
+    }
+
+    if "eval_strategy" in sig:
+        args_dict["eval_strategy"] = "epoch"
+    elif "evaluation_strategy" in sig:
+        args_dict["evaluation_strategy"] = "epoch"
+    else:
+        args_dict.pop("load_best_model_at_end", None)
+        args_dict.pop("metric_for_best_model", None)
+
+    if "lr_scheduler_type" in sig:
+        args_dict["lr_scheduler_type"] = "cosine"
+    if "weight_decay" in sig:
+        args_dict["weight_decay"] = 0.01
+    if "warmup_ratio" in sig:
+        args_dict["warmup_ratio"] = 0.1
+    elif "warmup_steps" in sig:
+        args_dict["warmup_steps"] = 100
+    if "generation_num_beams" in sig:
+        args_dict["generation_num_beams"] = NUM_BEAMS
+
+    safe_args = {k: v for k, v in args_dict.items() if k in sig}
+    training_args = Seq2SeqTrainingArguments(**safe_args)
 
     trainer = Seq2SeqTrainer(
         model=model,
