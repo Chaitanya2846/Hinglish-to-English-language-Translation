@@ -90,7 +90,7 @@ def compute_all_metrics(predictions: List[str], references: List[str]) -> Dict[s
     # BLEU + chrF++
     try:
         import sacrebleu
-        results["BLEU"] = round(sacrebleu.corpus_bleu(predictions, [[r] for r in references]).score, 2)
+        results["BLEU"] = round(sacrebleu.corpus_bleu(predictions, [[r] for r in references], smooth_method="exp").score, 2)
         results["chrF++"] = round(sacrebleu.corpus_chrf(predictions, [[r] for r in references], word_order=2).score, 2)
     except Exception as e:
         print(f"  [WARN] BLEU/chrF++ failed: {e}")
