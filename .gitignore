@@ -53,6 +53,8 @@ models/*checkpoint*/
 **/scheduler.pt
 **/trainer_state.json
 **/tokenizer.json
+finetune/outputs/**/README.md
+finetune/outputs/**/*.jinja
 
 # Archives
 *.zip
