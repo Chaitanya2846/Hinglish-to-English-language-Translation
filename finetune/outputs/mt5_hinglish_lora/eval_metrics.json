@@ -1,0 +1,14 @@
+{
+  "model": "Google mT5-Small (300M)",
+  "metrics": {
+    "BLEU": 51.7,
+    "chrF++": 45.74,
+    "ROUGE-1": 39.72,
+    "ROUGE-2": 17.98,
+    "ROUGE-L": 37.79,
+    "METEOR": 38.14,
+    "BERTScore_F1": 0.9065,
+    "Latency_ms": 641.1,
+    "Train_time_min": 18.6
+  }
+}
