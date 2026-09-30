@@ -46,6 +46,8 @@ models/*checkpoint*/
 **/checkpoints/
 **/pytorch_model.bin
 **/model.safetensors
+**/*.safetensors
+**/*.pth
 **/training_args.bin
 **/optimizer.pt
 **/scheduler.pt

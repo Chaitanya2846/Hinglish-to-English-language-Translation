@@ -1,0 +1,17 @@
+{
+  "model": "sarvamai/sarvam-1 (2B)",
+  "checkpoint": "checkpoint-611",
+  "task": "Romanized Hinglish to English NMT",
+  "dataset": "Custom Web-Scraped Social Media Corpus",
+  "samples_evaluated": 150,
+  "metrics": {
+    "BLEU": 52.66,
+    "chrF++": 66.85,
+    "ROUGE-1": 49.04,
+    "ROUGE-2": 26.56,
+    "ROUGE-L": 45.83,
+    "METEOR": 47.0,
+    "BERTScore_F1": 0.9017,
+    "Latency_ms": 2511.4
+  }
+}
