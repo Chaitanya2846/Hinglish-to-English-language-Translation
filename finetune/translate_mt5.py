@@ -1,8 +1,8 @@
 """
-translate_live.py — Live Interactive CPU Translation with Google mT5-Small (54.11 BLEU)
-========================================================================================
-Run this locally on your laptop:
-    .venv\\Scripts\\python finetune/translate_live.py
+translate_mt5.py — Live Interactive Translation with Google mT5-Small (54.11 BLEU)
+===================================================================================
+Run:
+    .venv\\Scripts\\python finetune/translate_mt5.py
 """
 import sys
 import time

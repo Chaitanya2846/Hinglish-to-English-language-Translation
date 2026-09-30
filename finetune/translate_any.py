@@ -25,7 +25,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 PYTHON_EXE = sys.executable
 
 MODELS = {
-    "1": ("Google mT5-Small (300M Seq2Seq)", SCRIPT_DIR / "translate_live.py"),
+    "1": ("Google mT5-Small (300M Seq2Seq)", SCRIPT_DIR / "translate_mt5.py"),
     "2": ("Sarvam-1 (2B QLoRA - Best Fluency)", SCRIPT_DIR / "translate_sarvam.py"),
     "3": ("RLM-Gemma-2B (v3 QLoRA - Causal LM)", SCRIPT_DIR / "translate_rlm.py"),
 }
