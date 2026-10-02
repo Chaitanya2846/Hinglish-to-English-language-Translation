@@ -146,8 +146,8 @@ def translate(text: str) -> str:
     prompt = INFERENCE_TEMPLATE.format(source=clean_text)
 
     inputs = _tokenizer(prompt, return_tensors="pt")
-    if _device == "cuda":
-        inputs = {k: v.to(_device) for k, v in inputs.items()}
+    input_device = _model.get_input_embeddings().weight.device
+    inputs = {key: value.to(input_device) for key, value in inputs.items()}
 
     with torch.no_grad():
         outputs = _model.generate(
