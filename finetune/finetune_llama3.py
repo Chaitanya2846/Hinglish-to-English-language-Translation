@@ -45,11 +45,24 @@ if sys.platform == "win32":
 DEFAULT_BASE_MODEL = "meta-llama/Meta-Llama-3-8B"
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent if (SCRIPT_DIR.parent / "data").exists() else SCRIPT_DIR
-DATA_DIR = SCRIPT_DIR / "data" if (SCRIPT_DIR / "data").exists() else PROJECT_ROOT / "data"
-OUTPUT_DIR = SCRIPT_DIR / "outputs" / "llama3_hinglish_lora"
+def find_data_file(filename: str) -> Path:
+    """Robust multi-path resolution for data files across different working directories."""
+    candidates = [
+        SCRIPT_DIR / "data" / filename,
+        PROJECT_ROOT / "finetune" / "data" / filename,
+        PROJECT_ROOT / "data" / filename,
+        Path("finetune") / "data" / filename,
+        Path("data") / filename,
+        Path("/content/NLP/finetune/data") / filename,
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    return SCRIPT_DIR / "data" / filename
 
-DEFAULT_TRAIN_FILE = DATA_DIR / "scraped_train_corpus.jsonl"
-DEFAULT_VAL_FILE = DATA_DIR / "scraped_val_corpus.jsonl"
+
+DEFAULT_TRAIN_FILE = find_data_file("scraped_train_corpus.jsonl")
+DEFAULT_VAL_FILE = find_data_file("scraped_val_corpus.jsonl")
 
 PROMPT_TEMPLATE = "Translate the following Romanized Hinglish text to fluent English.\nHinglish: {source}\nEnglish: {target}"
 INFERENCE_TEMPLATE = "Translate the following Romanized Hinglish text to fluent English.\nHinglish: {source}\nEnglish:"
@@ -217,6 +230,9 @@ def compute_evaluation_metrics(predictions: List[str], references: List[str]) ->
         results["ROUGE-1"] = results["ROUGE-2"] = results["ROUGE-L"] = 0.0
 
     try:
+        import nltk
+        for pkg in ["wordnet", "punkt", "punkt_tab", "omw-1.4"]:
+            nltk.download(pkg, quiet=True)
         import evaluate
         meteor = evaluate.load("meteor")
         m = meteor.compute(predictions=predictions, references=references)
@@ -243,6 +259,7 @@ def run_post_training_evaluation(model, tokenizer, val_pairs: List[Dict[str, str
     print(f"\n[Evaluation] Generating predictions for {len(test_set)} samples with Beam Search = 4...")
 
     model.eval()
+    model.config.use_cache = True
     if hasattr(model, "generation_config") and model.generation_config is not None:
         model.generation_config.max_length = None
 
@@ -277,6 +294,9 @@ def run_post_training_evaluation(model, tokenizer, val_pairs: List[Dict[str, str
         # Clean potential residual prefixes
         if "English:" in pred_text:
             pred_text = pred_text.split("English:")[-1].strip()
+        if not pred_text:
+            full_decoded = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
+            pred_text = full_decoded.split("English:")[-1].strip() if "English:" in full_decoded else full_decoded
 
         predictions.append(pred_text)
         references.append(item["target"])
@@ -401,6 +421,7 @@ def main():
     )
 
     model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
+    model.config.use_cache = False  # CRITICAL: must be False during training with gradient checkpointing
 
     # 7. Configure LoRA for all Linear Layers
     print(f"\n[4/5] Injecting LoRA Adapter (r={args.lora_r}, alpha={args.lora_alpha})...")
@@ -431,6 +452,7 @@ def main():
         warmup_ratio=0.05,
         weight_decay=0.01,
         fp16=True,
+        gradient_checkpointing=True,
         logging_steps=10,
         save_strategy="epoch",
         save_total_limit=2,

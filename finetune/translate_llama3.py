@@ -117,6 +117,7 @@ class Llama3Translator:
             print(f"  [!] Notice: Could not load LoRA adapter ({e}). Running base model.")
 
         self.model.eval()
+        self.model.config.use_cache = True
         if hasattr(self.model, "generation_config") and self.model.generation_config is not None:
             self.model.generation_config.max_length = None
 
@@ -150,6 +151,10 @@ class Llama3Translator:
 
         if "English:" in pred_text:
             pred_text = pred_text.split("English:")[-1].strip()
+
+        if not pred_text:
+            full_decoded = self.tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
+            pred_text = full_decoded.split("English:")[-1].strip() if "English:" in full_decoded else full_decoded
 
         return pred_text, latency_ms
 
