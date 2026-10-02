@@ -28,8 +28,15 @@ import json
 import time
 import zipfile
 import argparse
+import warnings
+import logging
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
+
+# Suppress benign generation warnings
+warnings.filterwarnings("ignore")
+os.environ["TRANSFORMERS_VERBOSITY"] = "error"
+logging.getLogger("transformers").setLevel(logging.ERROR)
 
 # Force UTF-8 on Windows / Linux terminals
 if sys.platform == "win32":
@@ -196,8 +203,8 @@ def compute_all_metrics(predictions: List[str], references: List[str]) -> Dict[s
     # 1. BLEU & chrF++
     try:
         import sacrebleu
-        results["BLEU"] = round(sacrebleu.corpus_bleu(predictions, [[r] for r in references], smooth_method="exp").score, 2)
-        results["chrF++"] = round(sacrebleu.corpus_chrf(predictions, [[r] for r in references], word_order=2).score, 2)
+        results["BLEU"] = round(sacrebleu.corpus_bleu(predictions, [references], smooth_method="exp").score, 2)
+        results["chrF++"] = round(sacrebleu.corpus_chrf(predictions, [references], word_order=2).score, 2)
     except Exception as e:
         print(f"  [WARN] BLEU/chrF++ evaluation failed: {e}")
         results["BLEU"] = results["chrF++"] = 0.0
@@ -273,6 +280,8 @@ def evaluate_causal_model(config: dict, adapter_path: Path, val_pairs: List[Dict
         print(f"  [!] Warning: Adapter weights not found locally or on Hugging Face. Running base model.")
 
     model.eval()
+    if hasattr(model, "generation_config") and model.generation_config is not None:
+        model.generation_config.max_length = None
     input_device = next(model.parameters()).device
     predictions, references, latencies = [], [], []
 
@@ -341,6 +350,8 @@ def evaluate_seq2seq_model(config: dict, adapter_path: Path, val_pairs: List[Dic
     if device == "cuda":
         model = model.cuda()
     model.eval()
+    if hasattr(model, "generation_config") and model.generation_config is not None:
+        model.generation_config.max_length = None
 
     prefix = config.get("prefix", "")
     predictions, references, latencies = [], [], []
