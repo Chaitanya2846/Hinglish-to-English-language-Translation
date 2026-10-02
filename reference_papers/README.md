@@ -10,7 +10,7 @@ All papers are verified, official conference versions from the **ACL Anthology**
 * **Title**: *Synthetic Data Generation and Joint Learning for Robust Code-Mixed Translation*
 * **Authors**: Kartik, Sanjana Soni, Anoop Kunchukuttan (AI4Bharat), Tanmoy Chakraborty (IIT Delhi), Md Shad Akhtar (IIIT Delhi)
 * **Conference**: Proceedings of the 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation (**LREC-COLING 2024**, pages 15480–15492, May 2024, ACL Anthology)
-* **Relevance**: **The Primary SOTA 2024 Base Paper**. Introduces the HINMIX corpus and evaluates Hinglish-to-English translation across noise-robust baselines (10.44 BLEU) and the proposed RCMT architecture (~14.00 BLEU). Serves as our primary modern benchmark, which our fine-tuned models comprehensively outperformed by **+38.66 BLEU points**.
+* **Relevance**: **The Primary SOTA 2024 Base Paper**. Introduces the HINMIX corpus and evaluates Hinglish-to-English translation across noise-robust baselines (10.44 BLEU) and the proposed RCMT architecture (~14.00 BLEU). Serves as our primary modern benchmark, which all three of our fine-tuned models outperformed (up to 19.94 BLEU).
 
 ---
 
@@ -18,7 +18,7 @@ All papers are verified, official conference versions from the **ACL Anthology**
 * **Title**: *Lost in Translation No More: Fine-tuned transformer-based models for CodeMix to English Machine Translation*
 * **Authors**: Arindam Chatterjee, Chhavi Sharma, Yashwanth V.P., Niraj Kumar, Ayush Raj, Asif Ekbal (Wipro Research Lab45 & IIT Patna)
 * **Conference**: Proceedings of the 20th International Conference on Natural Language Processing (**ICON 2023**, pages 226–235, ACL Anthology)
-* **Relevance**: **The Benchmark Baseline Paper**. Establishes the **PACMANtrans** benchmark dataset and evaluation suite (~18.66 BLEU baseline) which our fine-tuned models comprehensively outperformed by **+34.00 BLEU points**.
+* **Relevance**: **The Benchmark Baseline Paper**. Establishes the **PACMANtrans** benchmark dataset and evaluation suite (~18.66 BLEU baseline) which our fine-tuned Google mT5-Small model successfully surpassed (19.94 BLEU).
 
 ---
 
@@ -34,7 +34,7 @@ All papers are verified, official conference versions from the **ACL Anthology**
 * **Title**: *mT5: A Massively Multilingual Pre-trained Text-to-Text Transformer*
 * **Authors**: Linting Xue, Noah Constant, Adam Roberts, Mihir Kale, Rami Al-Rfou, Aditya Siddhant, Aditya Barua, Colin Raffel (Google Research)
 * **Conference**: Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (**NAACL-HLT 2021**, pages 483–498, ACL Anthology)
-* **Relevance**: **Model 1 Architecture**. Details Google's mT5 architecture pre-trained on 101 languages using the mC4 corpus. Demonstrates why its unquantized Seq2Seq encoder-decoder bidirectional structure achieves 54.11 BLEU at sub-second (655 ms) inference speeds.
+* **Relevance**: **Model 1 Architecture**. Details Google's mT5 architecture pre-trained on 101 languages using the mC4 corpus. Demonstrates why its unquantized Seq2Seq encoder-decoder bidirectional structure achieves 19.94 BLEU at sub-second (648 ms) inference speeds.
 
 ---
 

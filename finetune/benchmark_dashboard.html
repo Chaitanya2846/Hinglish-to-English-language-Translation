@@ -356,14 +356,14 @@
               <td class="model-name">RLM-Gemma-2B</td>
               <td>2.0B</td>
               <td><span class="tag tag-blue">QLoRA r=64</span></td>
-              <td class="mono">22.40</td>
-              <td class="mono">8.13</td>
-              <td class="mono">39.17</td>
-              <td class="mono">19.72</td>
-              <td class="mono">36.79</td>
-              <td class="mono">36.95</td>
-              <td class="mono">0.8781</td>
-              <td class="mono">1377 ms</td>
+              <td class="mono">14.64</td>
+              <td class="mono">33.75</td>
+              <td class="mono">39.48</td>
+              <td class="mono">20.40</td>
+              <td class="mono">37.24</td>
+              <td class="mono">37.90</td>
+              <td class="mono">0.8793</td>
+              <td class="mono">1348 ms</td>
             </tr>
             <tr style="background: rgba(99, 102, 241, 0.06);">
               <td class="model-name">
@@ -371,14 +371,14 @@
               </td>
               <td>2.0B</td>
               <td><span class="tag tag-blue">QLoRA r=32</span></td>
-              <td class="mono val-highlight">52.66</td>
-              <td class="mono winner">66.85</td>
-              <td class="mono winner">49.04</td>
+              <td class="mono val-highlight">17.30</td>
+              <td class="mono winner">41.56</td>
+              <td class="mono winner">49.18</td>
               <td class="mono winner">26.56</td>
-              <td class="mono winner">45.83</td>
-              <td class="mono winner">47.00</td>
-              <td class="mono val-highlight">0.9017</td>
-              <td class="mono">2511 ms</td>
+              <td class="mono winner">45.90</td>
+              <td class="mono winner">47.16</td>
+              <td class="mono val-highlight">0.9020</td>
+              <td class="mono">2493 ms</td>
             </tr>
             <tr style="background: rgba(16, 185, 129, 0.08);">
               <td class="model-name">
@@ -386,14 +386,14 @@
               </td>
               <td>300M</td>
               <td><span class="tag tag-green">Seq2Seq LoRA</span></td>
-              <td class="mono winner">54.11</td>
-              <td class="mono val-highlight">40.23</td>
-              <td class="mono val-highlight">40.31</td>
-              <td class="mono val-highlight">18.68</td>
-              <td class="mono val-highlight">38.20</td>
-              <td class="mono val-highlight">38.55</td>
-              <td class="mono winner">0.9071</td>
-              <td class="mono winner">645 ms</td>
+              <td class="mono winner">19.94</td>
+              <td class="mono val-highlight">38.56</td>
+              <td class="mono val-highlight">39.66</td>
+              <td class="mono val-highlight">17.94</td>
+              <td class="mono val-highlight">37.76</td>
+              <td class="mono val-highlight">38.48</td>
+              <td class="mono winner">0.9061</td>
+              <td class="mono winner">649 ms</td>
             </tr>
           </tbody>
         </table>
@@ -405,16 +405,16 @@
       <div class="panel-title">💡 Viva & Presentation Highlights</div>
       <div class="takeaway-grid">
         <div class="takeaway-card">
-          <h4>⚡ mT5-Small: Best Efficiency & Accuracy</h4>
-          <p>Scored highest overall BLEU (54.11) and BERTScore (0.9071) while running in only 645ms per sentence. Pre-trained on mC4 internet data which includes extensive Romanized code-mixed Hindi.</p>
+          <h4>⚡ mT5-Small: Best Efficiency & Highest BLEU</h4>
+          <p>Scored highest overall BLEU (19.94) and BERTScore (0.9061) while running in only 649ms per sentence. Pre-trained on mC4 internet data which includes extensive Romanized code-mixed Hindi.</p>
         </div>
         <div class="takeaway-card">
-          <h4>🇮🇳 Sarvam-1: Unmatched Indic Grammar</h4>
-          <p>Dominated character-level chrF++ (66.85) and bigram ROUGE-2 (26.56). Pre-trained on 2 trillion Indian tokens with a 131K Brahmic tokenizer, preserving nuanced Hindi syntax in translation.</p>
+          <h4>🇮🇳 Sarvam-1: Unmatched Indic Morphology & Fluency</h4>
+          <p>Dominated character-level chrF++ (41.56), METEOR (47.16), and bigram ROUGE-2 (26.56). Pre-trained on 2 trillion Indian tokens with a 131K Brahmic tokenizer, preserving nuanced Hindi syntax.</p>
         </div>
         <div class="takeaway-card">
-          <h4>📈 3.8× Improvement Over 2024 SOTA</h4>
-          <p>Both fine-tuned architectures comprehensively outperformed the latest 2024 SOTA baseline (RCMT @ 14.00 BLEU in LREC-COLING 2024) by +38.66 and +40.11 BLEU points, and PACMANtrans (@ 18.66 BLEU) by +34.00 points.</p>
+          <h4>📈 SOTA Outperformance</h4>
+          <p>All three fine-tuned architectures outperformed the 2024 SOTA baseline (RCMT @ 14.00 BLEU in LREC-COLING 2024), and Google mT5-Small (19.94 BLEU) successfully surpassed the PACMANtrans benchmark baseline (18.66 BLEU).</p>
         </div>
       </div>
     </div>
@@ -427,17 +427,17 @@
     new Chart(ctxBar, {
       type: 'bar',
       data: {
-        labels: ['RCMT (COLING \'24)', 'PACMANtrans (Base)', 'RLM-Gemma-2B', 'Sarvam-1 (2B)', 'Google mT5-Small'],
+        labels: ['RCMT (COLING \'24)', 'RLM-Gemma-2B', 'Sarvam-1 (2B)', 'PACMANtrans (Base)', 'Google mT5-Small'],
         datasets: [
           {
             label: 'BLEU Score',
-            data: [14.00, 18.66, 22.40, 52.66, 54.11],
-            backgroundColor: ['#e11d48', '#64748b', '#6366f1', '#38bdf8', '#10b981'],
+            data: [14.00, 14.64, 17.30, 18.66, 19.94],
+            backgroundColor: ['#e11d48', '#6366f1', '#38bdf8', '#64748b', '#10b981'],
             borderRadius: 6
           },
           {
             label: 'ROUGE-L',
-            data: [0, 0, 37.18, 45.76, 37.73],
+            data: [0, 37.24, 45.90, 0, 37.76],
             backgroundColor: 'rgba(255, 255, 255, 0.15)',
             borderRadius: 6
           }

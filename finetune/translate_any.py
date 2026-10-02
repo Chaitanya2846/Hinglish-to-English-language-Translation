@@ -2,9 +2,9 @@
 translate_any.py — Multi-Model Interactive Translation Hub
 ==========================================================
 Switch effortlessly between all fine-tuned Hinglish-to-English models:
-  [1] Google mT5-Small (300M Seq2Seq LoRA) — 54.11 BLEU
-  [2] Sarvam-1 (2B QLoRA)                 — 52.66 BLEU, 66.85 chrF++, 49.04 ROUGE-1
-  [3] RLM-Gemma-2B (QLoRA)                — 22.40 BLEU, rank r=64
+  [1] Google mT5-Small (300M Seq2Seq LoRA) — 19.94 BLEU (Sub-second inference)
+  [2] Sarvam-1 (2B QLoRA)                 — 17.30 BLEU, 41.56 chrF++, 49.18 ROUGE-1
+  [3] RLM-Gemma-2B (QLoRA)                — 14.64 BLEU, rank r=64
 
 Run:
     .venv\\Scripts\\python finetune/translate_any.py
@@ -36,9 +36,9 @@ def main():
     print("  🌐 Multi-Model Hinglish-to-English Translation Hub")
     print("=" * 70)
     print("Select a model to launch:\n")
-    print("  [1] Google mT5-Small (300M)  — 🥇 54.11 BLEU (Fastest, CPU-friendly)")
-    print("  [2] Sarvam-1 (2B)            — 🥈 52.66 BLEU, 66.85 chrF++ (Best fluency)")
-    print("  [3] RLM-Gemma-2B             — 🥉 22.40 BLEU (Instruction fine-tuned)")
+    print("  [1] Google mT5-Small (300M)  — 🥇 19.94 BLEU (Fastest, CPU-friendly)")
+    print("  [2] Sarvam-1 (2B)            — 🥈 17.30 BLEU, 41.56 chrF++ (Best fluency)")
+    print("  [3] RLM-Gemma-2B             — 🥉 14.64 BLEU (Causal LM)")
     print("  [q] Quit")
     print("-" * 70)
 
