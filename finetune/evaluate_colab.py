@@ -42,6 +42,13 @@ if sys.platform == "win32":
 
 def install_colab_dependencies():
     """Ensure all required evaluation packages are present in Colab."""
+    import subprocess
+    # Fix torchao incompatibility in Colab if present
+    try:
+        subprocess.call([sys.executable, "-m", "pip", "uninstall", "-y", "torchao"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        pass
+
     required = ["transformers", "peft", "accelerate", "bitsandbytes", "sacrebleu", "evaluate", "rouge_score", "bert_score"]
     missing = []
     for pkg in required:
@@ -52,9 +59,36 @@ def install_colab_dependencies():
 
     if missing:
         print(f"[!] Installing required dependencies: {', '.join(missing)}...")
-        import subprocess
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-q"] + missing)
         print("[+] Dependencies successfully installed!\n")
+
+
+def resolve_adapter_source(adapter_path: Path, hf_id: Optional[str]) -> Optional[str]:
+    """
+    Returns local path ONLY if adapter_model weights actually exist on disk.
+    Otherwise falls back to Hugging Face Hub ID.
+    """
+    if adapter_path.exists():
+        has_weights = (
+            (adapter_path / "adapter_model.safetensors").exists()
+            or (adapter_path / "adapter_model.bin").exists()
+        )
+        if has_weights:
+            return str(adapter_path)
+
+        chk_dirs = sorted(
+            (adapter_path / "checkpoints").glob("checkpoint-*"),
+            key=lambda p: int(p.name.split("-")[-1]) if p.name.split("-")[-1].isdigit() else 0
+        )
+        if chk_dirs:
+            latest = chk_dirs[-1]
+            if (latest / "adapter_model.safetensors").exists() or (latest / "adapter_model.bin").exists():
+                return str(latest)
+
+    if hf_id:
+        return hf_id
+
+    return None
 
 
 # ── Path Resolution ──────────────────────────────────────────────────────────
@@ -230,22 +264,13 @@ def evaluate_causal_model(config: dict, adapter_path: Path, val_pairs: List[Dict
         )
 
     print(f"[2/3] Attaching LoRA Adapter...")
-    actual_adapter = None
-    if (adapter_path / "adapter_config.json").exists():
-        actual_adapter = str(adapter_path)
-    else:
-        chk_dirs = sorted((adapter_path / "checkpoints").glob("checkpoint-*"), key=lambda p: int(p.name.split("-")[-1]) if p.name.split("-")[-1].isdigit() else 0)
-        if chk_dirs:
-            actual_adapter = str(chk_dirs[-1])
-        elif config.get("hf_adapter"):
-            actual_adapter = config["hf_adapter"]
-
+    actual_adapter = resolve_adapter_source(adapter_path, config.get("hf_adapter"))
     if actual_adapter:
         print(f"  [+] Loading LoRA weights from: {actual_adapter}")
         model = PeftModel.from_pretrained(model, actual_adapter)
         print(f"  [+] Fine-tuned LoRA weights successfully attached!")
     else:
-        print(f"  [!] Warning: Adapter not found locally or on Hugging Face. Running base model.")
+        print(f"  [!] Warning: Adapter weights not found locally or on Hugging Face. Running base model.")
 
     model.eval()
     input_device = next(model.parameters()).device
@@ -305,22 +330,13 @@ def evaluate_seq2seq_model(config: dict, adapter_path: Path, val_pairs: List[Dic
     model = AutoModelForSeq2SeqLM.from_pretrained(config["base"], torch_dtype=torch.float32)
 
     print(f"[2/3] Attaching LoRA Adapter...")
-    actual_adapter = None
-    if (adapter_path / "adapter_config.json").exists():
-        actual_adapter = str(adapter_path)
-    else:
-        chk_dirs = sorted((adapter_path / "checkpoints").glob("checkpoint-*"), key=lambda p: int(p.name.split("-")[-1]) if p.name.split("-")[-1].isdigit() else 0)
-        if chk_dirs:
-            actual_adapter = str(chk_dirs[-1])
-        elif config.get("hf_adapter"):
-            actual_adapter = config["hf_adapter"]
-
+    actual_adapter = resolve_adapter_source(adapter_path, config.get("hf_adapter"))
     if actual_adapter:
         print(f"  [+] Loading LoRA weights from: {actual_adapter}")
         model = PeftModel.from_pretrained(model, actual_adapter)
         print(f"  [+] Fine-tuned LoRA weights successfully attached!")
     else:
-        print(f"  [!] Warning: Adapter not found locally or on Hugging Face. Running base model.")
+        print(f"  [!] Warning: Adapter weights not found locally or on Hugging Face. Running base model.")
 
     if device == "cuda":
         model = model.cuda()
@@ -451,11 +467,9 @@ def main():
         print(f"  Evaluating: {cfg['name']}")
         print("=" * 75)
 
-        has_local = adapter_path.exists() and (adapter_path / "adapter_config.json").exists()
-        has_hf = bool(cfg.get("hf_adapter"))
-
-        if not has_local and not has_hf:
-            print(f"  [!] Adapter not found locally or on Hugging Face: {adapter_path}")
+        actual_adapter = resolve_adapter_source(adapter_path, cfg.get("hf_adapter"))
+        if not actual_adapter:
+            print(f"  [!] Adapter weights not found locally or on Hugging Face for {cfg['name']}")
             print(f"      Please upload '{cfg['adapter_rel']}.zip' to Colab or extract it into {output_dir}.")
             continue
 
