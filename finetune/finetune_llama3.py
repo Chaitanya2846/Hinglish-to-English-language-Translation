@@ -45,6 +45,9 @@ if sys.platform == "win32":
 DEFAULT_BASE_MODEL = "meta-llama/Meta-Llama-3-8B"
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent if (SCRIPT_DIR.parent / "data").exists() else SCRIPT_DIR
+DATA_DIR = SCRIPT_DIR / "data" if (SCRIPT_DIR / "data").exists() else PROJECT_ROOT / "data"
+OUTPUT_DIR = SCRIPT_DIR / "outputs" / "llama3_hinglish_lora"
+
 def find_data_file(filename: str) -> Path:
     """Robust multi-path resolution for data files across different working directories."""
     candidates = [
@@ -376,7 +379,7 @@ def main():
     val_pairs = load_jsonl(DEFAULT_VAL_FILE)
 
     if args.combine_phinc:
-        phinc_file = DATA_DIR / "phinc_train.jsonl"
+        phinc_file = find_data_file("phinc_train.jsonl")
         phinc_pairs = load_jsonl(phinc_file)
         train_pairs.extend(phinc_pairs)
         print(f"  [+] Augmented with PHINC corpus (+{len(phinc_pairs)} pairs)")
