@@ -47,6 +47,7 @@ MODELS = {
     "RLM-Gemma-2B (QLoRA)": {
         "type": "causal",
         "base": "rudrashah/RLM-hinglish-translator",
+        "hf_adapter": "Nickhasntlost/rlm-gemma-2b-hinglish-lora",
         "adapter": SCRIPT_DIR / "outputs" / "rlm_hinglish_lora_v3",
         "prompt_template": "Hinglish:\n{source}\n\nEnglish:\n",
         "extract_key": "English:\n",
@@ -55,6 +56,7 @@ MODELS = {
     "Sarvam-1 (QLoRA)": {
         "type": "causal",
         "base": "sarvamai/sarvam-1",
+        "hf_adapter": "Nickhasntlost/sarvam-1-hinglish-lora",
         "adapter": SCRIPT_DIR / "outputs" / "sarvam_hinglish_lora",
         "prompt_template": "Translate Hinglish to English.\nHinglish: {source}\nEnglish:",
         "extract_key": "English:",
@@ -63,6 +65,7 @@ MODELS = {
     "mT5-Small (LoRA)": {
         "type": "seq2seq_mt5",
         "base": "google/mt5-small",
+        "hf_adapter": "Nickhasntlost/mt5-small-hinglish-lora",
         "adapter": SCRIPT_DIR / "outputs" / "mt5_hinglish_lora",
         "prefix": "translate Hinglish to English: ",
         "num_beams": 5,
@@ -138,17 +141,21 @@ def evaluate_causal_model(config: dict, val_pairs: List[Dict], device: str) -> T
         device_map="auto", torch_dtype=torch.float16, trust_remote_code=True)
 
     adapter_path = Path(config["adapter"])
-    if not (adapter_path / "adapter_config.json").exists():
+    actual_adapter = None
+    if (adapter_path / "adapter_config.json").exists():
+        actual_adapter = str(adapter_path)
+    else:
         chk_dirs = sorted((adapter_path / "checkpoints").glob("checkpoint-*"), key=lambda p: int(p.name.split("-")[-1]) if p.name.split("-")[-1].isdigit() else 0)
         if chk_dirs:
-            adapter_path = chk_dirs[-1]
-            print(f"  [+] Found checkpoint adapter: {adapter_path}")
+            actual_adapter = str(chk_dirs[-1])
+        elif config.get("hf_adapter"):
+            actual_adapter = config["hf_adapter"]
 
-    if adapter_path.exists() and (adapter_path / "adapter_config.json").exists():
-        model = PeftModel.from_pretrained(model, str(adapter_path))
-        print(f"  [+] Loaded LoRA adapter from {adapter_path}")
+    if actual_adapter:
+        model = PeftModel.from_pretrained(model, actual_adapter)
+        print(f"  [+] Loaded LoRA adapter from {actual_adapter}")
     else:
-        print(f"  [!] No adapter found at {adapter_path}, using base model")
+        print(f"  [!] No adapter found at {adapter_path} or on Hugging Face, using base model")
 
     model.eval()
     predictions, references, latencies = [], [], []
@@ -188,17 +195,21 @@ def evaluate_seq2seq_model(config: dict, val_pairs: List[Dict], device: str) -> 
     model = AutoModelForSeq2SeqLM.from_pretrained(config["base"], torch_dtype=torch.float32)
 
     adapter_path = Path(config["adapter"])
-    if not (adapter_path / "adapter_config.json").exists():
+    actual_adapter = None
+    if (adapter_path / "adapter_config.json").exists():
+        actual_adapter = str(adapter_path)
+    else:
         chk_dirs = sorted((adapter_path / "checkpoints").glob("checkpoint-*"), key=lambda p: int(p.name.split("-")[-1]) if p.name.split("-")[-1].isdigit() else 0)
         if chk_dirs:
-            adapter_path = chk_dirs[-1]
-            print(f"  [+] Found checkpoint adapter: {adapter_path}")
+            actual_adapter = str(chk_dirs[-1])
+        elif config.get("hf_adapter"):
+            actual_adapter = config["hf_adapter"]
 
-    if adapter_path.exists() and (adapter_path / "adapter_config.json").exists():
-        model = PeftModel.from_pretrained(model, str(adapter_path))
-        print(f"  [+] Loaded LoRA adapter from {adapter_path}")
+    if actual_adapter:
+        model = PeftModel.from_pretrained(model, actual_adapter)
+        print(f"  [+] Loaded LoRA adapter from {actual_adapter}")
     else:
-        print(f"  [!] No adapter found at {adapter_path}, using base model")
+        print(f"  [!] No adapter found at {adapter_path} or on Hugging Face, using base model")
 
     if device == "cuda":
         model = model.cuda()
@@ -270,8 +281,10 @@ def main():
         print(f"{'─' * 70}")
 
         adapter_path = config["adapter"]
-        if not adapter_path.exists():
-            print(f"  [SKIP] Adapter not found at {adapter_path}")
+        has_local = adapter_path.exists() and (adapter_path / "adapter_config.json").exists()
+        has_hf = bool(config.get("hf_adapter"))
+        if not has_local and not has_hf:
+            print(f"  [SKIP] Adapter not found at {adapter_path} or on Hugging Face")
             print(f"         Train this model first: python finetune_*.py")
             continue
 
