@@ -4,22 +4,31 @@ This folder contains the complete academic publications and technical reports se
 
 ---
 
-### 1. `01_Agarwal_2021_Hinglish_to_English_MT.pdf`
+### 1. `00_Kartik_2024_LREC_COLING_Robust_CodeMix_MT.pdf`
+* **Title**: *Synthetic Data Generation and Joint Learning for Robust Code-Mixed Translation*
+* **Authors**: Kartik, Sanjana Soni, Anoop Kunchukuttan (AI4Bharat), Tanmoy Chakraborty (IIT Delhi), Md Shad Akhtar (IIIT Delhi)
+* **Conference**: Proceedings of the 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation (**LREC-COLING 2024**, pages 14812–14824, ACL Anthology)
+* **Relevance**: **The Primary SOTA 2024 Base Paper**. Introduces the HINMIX corpus and evaluates Hinglish-to-English translation across noise-robust baselines (10.44 BLEU) and the proposed RCMT architecture (~14.00 BLEU). Serves as our primary modern benchmark, which our fine-tuned models comprehensively outperformed by **+38.66 BLEU points**.
+
+---
+
+### 2. `01_Agarwal_2021_Hinglish_to_English_MT.pdf`
 * **Title**: *Hinglish to English Machine Translation using Multilingual Transformers*
 * **Authors**: Vibhav Agarwal, Pooja S. B. Rao, Dinesh Babu Jayagopi
 * **Conference**: Proceedings of the Student Research Workshop Associated with RANLP 2021 (pages 1–7)
-* **Relevance**: The seminal paper demonstrating that multilingual text-to-text models (mT5 and mBART) effectively translate Romanized code-mixed Hinglish into English, serving as the primary academic justification for our mT5-Small experiment.
+* **Relevance**: Architectural foundation paper demonstrating that multilingual text-to-text models (mT5 and mBART) effectively translate Romanized code-mixed Hinglish into English, serving as the academic justification for our mT5-Small experiment.
 
 ---
 
-### 2. `02_PACMANtrans_ICON2023_CodeMix_to_English.pdf`
+### 3. `02_PACMANtrans_ICON2023_CodeMix_to_English.pdf`
 * **Title**: *Lost in Translation No More: Fine-tuned transformer-based models for CodeMix to English Machine Translation*
-* **Authors**: ICON 2023 / ACL Anthology
-* **Relevance**: Introduces the **PACMANtrans** benchmark dataset and evaluation suite (~18.66 BLEU baseline) which our fine-tuned models comprehensively outperformed by **+35.45 BLEU points**.
+* **Authors**: Arindam Chatterjee, Chhavi Sharma, Yashwanth V.P., Niraj Kumar, Ayush Raj, Asif Ekbal (Wipro Research Lab45 & IIT Patna)
+* **Conference**: ICON 2023 / ACL Anthology
+* **Relevance**: Introduces the **PACMANtrans** benchmark dataset and evaluation suite (~18.66 BLEU baseline) which our fine-tuned models comprehensively outperformed by **+34.00 BLEU points**.
 
 ---
 
-### 3. `03_Google_mT5_Multilingual_Transformer.pdf`
+### 4. `03_Google_mT5_Multilingual_Transformer.pdf`
 * **Title**: *mT5: A Massively Multilingual Pre-trained Text-to-Text Transformer*
 * **Authors**: Linting Xue, Noah Constant, Adam Roberts, Mihir Kale, Rami Al-Rfou, Aditya Siddhant, Aditya Barua, Colin Raffel
 * **Conference**: NAACL-HLT 2021
@@ -27,7 +36,7 @@ This folder contains the complete academic publications and technical reports se
 
 ---
 
-### 4. `04_Hu_2021_LoRA_Low_Rank_Adaptation.pdf`
+### 5. `04_Hu_2021_LoRA_Low_Rank_Adaptation.pdf`
 * **Title**: *LoRA: Low-Rank Adaptation of Large Language Models*
 * **Authors**: Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, Weizhu Chen (Microsoft)
 * **Conference**: ICLR 2022
@@ -35,7 +44,7 @@ This folder contains the complete academic publications and technical reports se
 
 ---
 
-### 5. `05_Dettmers_2023_QLoRA_Quantized_LLMs.pdf`
+### 6. `05_Dettmers_2023_QLoRA_Quantized_LLMs.pdf`
 * **Title**: *QLoRA: Efficient Finetuning of Quantized LLMs*
 * **Authors**: Tim Dettmers, Artidoro Pagnoni, Ari Holtzman, Luke Zettlemoyer (University of Washington)
 * **Conference**: NeurIPS 2023
@@ -43,7 +52,7 @@ This folder contains the complete academic publications and technical reports se
 
 ---
 
-### 6. `06_IndicTrans2_Indian_Languages_MT.pdf`
+### 7. `06_IndicTrans2_Indian_Languages_MT.pdf`
 * **Title**: *IndicTrans2: Towards High-Quality and Accessible Machine Translation Models for all 22 Scheduled Indian Languages*
 * **Authors**: Jay Gala, Pranjal A. Chitale, Raghavan Ashok, et al. (AI4Bharat)
 * **Conference**: ACL 2023
@@ -51,7 +60,7 @@ This folder contains the complete academic publications and technical reports se
 
 ---
 
-### 7. `07_Sarvam_BrahmicTokenizer131K.pdf`
+### 8. `07_Sarvam_BrahmicTokenizer131K.pdf`
 * **Title**: *BrahmicTokenizer-131K: A Comprehensive Tokenizer for Indian Languages*
 * **Authors**: Sarvam AI Research Team (2024)
 * **Relevance**: Details the design of the custom tokenizer powering **Sarvam-1 (2B)**, explaining why Sarvam-1 achieves outstanding character and bigram fluency (**66.85 chrF++**, **49.04 ROUGE-1**) across Indian code-mixed constructs.

@@ -256,10 +256,10 @@ def print_comparison_table(all_results: Dict[str, Dict]):
                f"{m.get('BERTScore_F1',0):<7} | {m.get('Latency_ms',0):<8}")
         print(row)
     print("=" * 110)
-    # Find best model
     best = max(all_results.items(), key=lambda x: x[1].get("BLEU", 0))
     print(f"\n  >>> BEST MODEL: {best[0]} (BLEU: {best[1]['BLEU']})")
-    print(f"  >>> vs PACMANtrans (ACL 2024): ~18.66 BLEU")
+    print(f"  >>> vs RCMT (LREC-COLING 2024 SOTA Base): ~14.00 BLEU (+{best[1]['BLEU'] - 14.00:.2f})")
+    print(f"  >>> vs PACMANtrans (ACL/ICON 2023 Base) : ~18.66 BLEU (+{best[1]['BLEU'] - 18.66:.2f})")
 
 
 def main():

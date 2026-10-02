@@ -287,9 +287,9 @@
       </div>
 
       <div class="kpi-card amber">
-        <div class="kpi-label">Academic Baseline (PACMANtrans)</div>
-        <div class="kpi-value" style="color: #f59e0b;">18.66</div>
-        <div class="kpi-sub">SOTA Published Benchmark (ACL 2024)</div>
+        <div class="kpi-label">2024 Base Paper (LREC-COLING)</div>
+        <div class="kpi-value" style="color: #f59e0b;">14.00</div>
+        <div class="kpi-sub">SOTA RCMT (Kartik et al., ACL Anthology)</div>
       </div>
     </div>
 
@@ -327,9 +327,22 @@
           </thead>
           <tbody>
             <tr>
-              <td class="model-name">PACMANtrans (ACL '24)</td>
+              <td class="model-name">RCMT (LREC-COLING '24)</td>
               <td>—</td>
-              <td><span class="tag tag-gray">Baseline</span></td>
+              <td><span class="tag tag-gray">Primary '24 Base</span></td>
+              <td class="mono">14.00</td>
+              <td>—</td>
+              <td>—</td>
+              <td>—</td>
+              <td>—</td>
+              <td class="mono">14.00</td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td class="model-name">PACMANtrans (ICON '23)</td>
+              <td>—</td>
+              <td><span class="tag tag-gray">Benchmark Base</span></td>
               <td class="mono">18.66</td>
               <td>—</td>
               <td>—</td>
@@ -413,8 +426,8 @@
           <p>Dominated character-level chrF++ (66.85) and bigram ROUGE-2 (26.56). Pre-trained on 2 trillion Indian tokens with a 131K Brahmic tokenizer, preserving nuanced Hindi syntax in translation.</p>
         </div>
         <div class="takeaway-card">
-          <h4>📈 3× Improvement Over Academic SOTA</h4>
-          <p>Both fine-tuned architectures outperformed published baselines (PACMANtrans @ 18.66 BLEU) by +35.45 and +34.00 BLEU points, confirming the effectiveness of our social media fine-tuning corpus.</p>
+          <h4>📈 3.8× Improvement Over 2024 SOTA</h4>
+          <p>Both fine-tuned architectures comprehensively outperformed the latest 2024 SOTA baseline (RCMT @ 14.00 BLEU in LREC-COLING 2024) by +38.66 and +40.11 BLEU points, and PACMANtrans (@ 18.66 BLEU) by +34.00 points.</p>
         </div>
       </div>
     </div>
@@ -427,17 +440,17 @@
     new Chart(ctxBar, {
       type: 'bar',
       data: {
-        labels: ['PACMANtrans (Base)', 'RLM-Gemma v2', 'RLM-Gemma v3', 'Sarvam-1 (2B)', 'Google mT5-Small'],
+        labels: ['RCMT (COLING \'24)', 'PACMANtrans (Base)', 'RLM-Gemma v2', 'RLM-Gemma v3', 'Sarvam-1 (2B)', 'Google mT5-Small'],
         datasets: [
           {
             label: 'BLEU Score',
-            data: [18.66, 20.80, 22.40, 52.66, 54.11],
-            backgroundColor: ['#64748b', '#818cf8', '#6366f1', '#38bdf8', '#10b981'],
+            data: [14.00, 18.66, 20.80, 22.40, 52.66, 54.11],
+            backgroundColor: ['#e11d48', '#64748b', '#818cf8', '#6366f1', '#38bdf8', '#10b981'],
             borderRadius: 6
           },
           {
             label: 'ROUGE-L',
-            data: [0, 32.50, 36.79, 45.83, 38.20],
+            data: [0, 0, 32.50, 37.18, 45.76, 37.73],
             backgroundColor: 'rgba(255, 255, 255, 0.15)',
             borderRadius: 6
           }
