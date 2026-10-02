@@ -351,20 +351,7 @@
               <td>—</td>
               <td>—</td>
               <td>—</td>
-            </tr>
-            <tr>
-              <td class="model-name">RLM-Gemma-2B (v2)</td>
-              <td>2.0B</td>
-              <td><span class="tag tag-blue">QLoRA r=32</span></td>
-              <td class="mono">20.80</td>
-              <td>—</td>
-              <td class="mono">34.20</td>
-              <td class="mono">15.10</td>
-              <td class="mono">32.50</td>
-              <td class="mono">31.20</td>
-              <td class="mono">0.8520</td>
-              <td class="mono">~1400 ms</td>
-            </tr>
+
             <tr>
               <td class="model-name">RLM-Gemma-2B (v3)</td>
               <td>2.0B</td>
@@ -440,17 +427,17 @@
     new Chart(ctxBar, {
       type: 'bar',
       data: {
-        labels: ['RCMT (COLING \'24)', 'PACMANtrans (Base)', 'RLM-Gemma v2', 'RLM-Gemma v3', 'Sarvam-1 (2B)', 'Google mT5-Small'],
+        labels: ['RCMT (COLING \'24)', 'PACMANtrans (Base)', 'RLM-Gemma (v3)', 'Sarvam-1 (2B)', 'Google mT5-Small'],
         datasets: [
           {
             label: 'BLEU Score',
-            data: [14.00, 18.66, 20.80, 22.40, 52.66, 54.11],
-            backgroundColor: ['#e11d48', '#64748b', '#818cf8', '#6366f1', '#38bdf8', '#10b981'],
+            data: [14.00, 18.66, 22.40, 52.66, 54.11],
+            backgroundColor: ['#e11d48', '#64748b', '#6366f1', '#38bdf8', '#10b981'],
             borderRadius: 6
           },
           {
             label: 'ROUGE-L',
-            data: [0, 0, 32.50, 37.18, 45.76, 37.73],
+            data: [0, 0, 37.18, 45.76, 37.73],
             backgroundColor: 'rgba(255, 255, 255, 0.15)',
             borderRadius: 6
           }

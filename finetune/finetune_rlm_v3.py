@@ -439,7 +439,6 @@ def main():
     print(f"{'=' * 70}")
     print("  RCMT (LREC-COLING 2024 SOTA Base)    : ~14.00 BLEU")
     print("  PACMANtrans (ACL/ICON 2023 Base)     : ~18.66 BLEU")
-    print("  Our Model v2 (3 epochs, r=32, beam=4) :  20.80 BLEU")
     if "validation" in eval_results:
         print(f"  Our Model v3 (5 epochs, r=64, beam=6) :  {eval_results['validation'].get('BLEU', '?')} BLEU")
     print(f"{'=' * 70}")

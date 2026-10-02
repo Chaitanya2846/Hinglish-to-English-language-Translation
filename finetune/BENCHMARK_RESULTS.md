@@ -9,7 +9,6 @@
 ```text
 RCMT (LREC-COLING 2024 Base) [███████                     ]  14.00 BLEU
 PACMANtrans (ICON 2023 Base) [█████████                   ]  18.66 BLEU
-RLM-Gemma-2B (v2)            [██████████                  ]  20.80 BLEU
 RLM-Gemma-2B (v3)            [███████████                 ]  22.40 BLEU
 Sarvam-1 (2B QLoRA)          [██████████████████████████  ]  52.66 BLEU  (+38.66) 🥈
 Google mT5-Small             [███████████████████████████ ]  54.11 BLEU  (+40.11) 🥇
@@ -23,7 +22,6 @@ Google mT5-Small             [████████████████�
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|
 | **RCMT (LREC-COLING 2024)** | — | Primary 2024 SOTA Base | 14.00 | — | 14.00 | — |
 | **PACMANtrans (ACL/ICON 2023)** | — | Benchmark Baseline | 18.66 | — | — | — |
-| **RLM-Gemma-2B (v2)** | 2.0B | QLoRA ($r=32$) | 20.80 | — | 31.20 | 0.8520 |
 | **RLM-Gemma-2B (v3)** | 2.0B | QLoRA ($r=64$) | 22.40 | 8.13 | 36.95 | 0.8781 |
 | **Sarvam-1 (2B)** | 2.0B | QLoRA ($r=32$) | **52.66** | **66.85** | **47.07** | **0.9016** |
 | **Google mT5-Small** | 300M | Seq2Seq LoRA | **54.11** | 45.74 | 38.48 | **0.9071** |
@@ -36,7 +34,6 @@ Google mT5-Small             [████████████████�
 |:---|:---:|:---:|:---:|:---:|:---:|
 | **RCMT (LREC-COLING 2024)** | — | — | — | — | — |
 | **PACMANtrans (ACL/ICON 2023)** | — | — | — | — | — |
-| **RLM-Gemma-2B (v2)** | 34.20 | 15.10 | 32.50 | ~1400 ms | 1.5 hrs |
 | **RLM-Gemma-2B (v3)** | 39.62 | 20.32 | 37.18 | 1332 ms | 2.0 hrs |
 | **Sarvam-1 (2B)** | **49.28** | **26.60** | **45.76** | 2521 ms | 2.2 hrs |
 | **Google mT5-Small** | 39.56 | 17.75 | 37.73 | **656 ms** | **19.5 min** |
