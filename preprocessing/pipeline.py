@@ -12,11 +12,17 @@ corpus from Phase 1. It performs no silent script guessing and flags ambiguous
 or garbage tokens rather than converting them.
 """
 import html
+import os
 import re
 from typing import Dict, List
+import spacy
 
 
-MARKERS_PATH = r"C:\Users\User\Desktop\NLP\data\roman_hindi_markers.json"
+MARKERS_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "data",
+    "roman_hindi_markers.json",
+)
 
 ROMAN_HINDI_MARKERS = [
     "hai", "hain", "kya", "nahi", "bhai", "yaar", "acha", "achha", "kar",

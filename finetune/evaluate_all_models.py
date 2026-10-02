@@ -70,6 +70,15 @@ MODELS = {
         "prefix": "translate Hinglish to English: ",
         "num_beams": 5,
     },
+    "Meta-Llama-3-8B (8B QLoRA)": {
+        "type": "causal",
+        "base": "meta-llama/Meta-Llama-3-8B",
+        "hf_adapter": "Nickhasntlost/llama-3-8b-hinglish-lora",
+        "adapter": SCRIPT_DIR / "outputs" / "llama3_hinglish_lora",
+        "prompt_template": "Translate the following Romanized Hinglish text to fluent English.\nHinglish: {source}\nEnglish:",
+        "extract_key": "English:",
+        "num_beams": 4,
+    },
 }
 
 
@@ -131,14 +140,16 @@ def evaluate_causal_model(config: dict, val_pairs: List[Dict], device: str) -> T
     from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
     from peft import PeftModel
 
-    tokenizer = AutoTokenizer.from_pretrained(config["base"], trust_remote_code=True)
+    hf_token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+
+    tokenizer = AutoTokenizer.from_pretrained(config["base"], trust_remote_code=True, token=hf_token)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
     bnb_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
         bnb_4bit_compute_dtype=torch.float16, bnb_4bit_use_double_quant=True)
     model = AutoModelForCausalLM.from_pretrained(config["base"], quantization_config=bnb_config,
-        device_map="auto", torch_dtype=torch.float16, trust_remote_code=True)
+        device_map="auto", torch_dtype=torch.float16, trust_remote_code=True, token=hf_token)
 
     adapter_path = Path(config["adapter"])
     actual_adapter = None

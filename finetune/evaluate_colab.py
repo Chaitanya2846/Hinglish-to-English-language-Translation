@@ -112,6 +112,7 @@ def auto_extract_adapters(search_dirs: List[Path], output_dir: Path):
         "sarvam": ("sarvam_hinglish_lora.zip", output_dir / "sarvam_hinglish_lora"),
         "rlm": ("rlm_hinglish_lora_v3.zip", output_dir / "rlm_hinglish_lora_v3"),
         "mt5": ("mt5_hinglish_lora.zip", output_dir / "mt5_hinglish_lora"),
+        "llama3": ("llama3_hinglish_lora.zip", output_dir / "llama3_hinglish_lora"),
     }
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -173,6 +174,17 @@ MODEL_CONFIGS = {
         "hf_adapter": "Nickhasntlost/mt5-small-hinglish-lora",
         "adapter_rel": "mt5_hinglish_lora",
         "prefix": "translate Hinglish to English: ",
+        "num_beams": 4,
+        "trust_remote_code": False,
+    },
+    "llama3": {
+        "name": "Meta-Llama-3-8B (8B QLoRA)",
+        "type": "causal",
+        "base": "meta-llama/Meta-Llama-3-8B",
+        "hf_adapter": "Nickhasntlost/llama-3-8b-hinglish-lora",
+        "adapter_rel": "llama3_hinglish_lora",
+        "prompt_template": "Translate the following Romanized Hinglish text to fluent English.\nHinglish: {source}\nEnglish:",
+        "extract_key": "English:",
         "num_beams": 4,
         "trust_remote_code": False,
     },
@@ -242,8 +254,20 @@ def evaluate_causal_model(config: dict, adapter_path: Path, val_pairs: List[Dict
     from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
     from peft import PeftModel
 
+    hf_token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    try:
+        from google.colab import userdata
+        if not hf_token:
+            hf_token = userdata.get("HF_TOKEN")
+    except Exception:
+        pass
+
     print(f"\n[1/3] Loading Tokenizer & Causal Base Model ({config['base']})...")
-    tokenizer = AutoTokenizer.from_pretrained(config["base"], trust_remote_code=config.get("trust_remote_code", False))
+    tokenizer = AutoTokenizer.from_pretrained(
+        config["base"],
+        trust_remote_code=config.get("trust_remote_code", False),
+        token=hf_token,
+    )
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
     tokenizer.padding_side = "left"
@@ -261,6 +285,7 @@ def evaluate_causal_model(config: dict, adapter_path: Path, val_pairs: List[Dict
             device_map="auto",
             torch_dtype=torch.float16,
             trust_remote_code=config.get("trust_remote_code", False),
+            token=hf_token,
         )
     else:
         model = AutoModelForCausalLM.from_pretrained(
@@ -268,6 +293,7 @@ def evaluate_causal_model(config: dict, adapter_path: Path, val_pairs: List[Dict
             torch_dtype=torch.float32,
             low_cpu_mem_usage=True,
             trust_remote_code=config.get("trust_remote_code", False),
+            token=hf_token,
         )
 
     print(f"[2/3] Attaching LoRA Adapter...")
@@ -424,8 +450,8 @@ def print_comparison_table(results: Dict[str, Dict]):
 
 def main():
     parser = argparse.ArgumentParser(description="Multi-Model Hinglish-to-English Benchmark on Google Colab GPU")
-    parser.add_argument("--model", type=str, choices=["all", "sarvam", "rlm", "mt5"], default="all",
-                        help="Which model to evaluate ('all', 'sarvam', 'rlm', or 'mt5')")
+    parser.add_argument("--model", type=str, choices=["all", "sarvam", "rlm", "mt5", "llama3"], default="all",
+                        help="Which model to evaluate ('all', 'sarvam', 'rlm', 'mt5', or 'llama3')")
     parser.add_argument("--limit", type=int, default=150,
                         help="Number of validation samples to evaluate (default: 150 for quick test, 0 or 996 for full corpus)")
     parser.add_argument("--val_file", type=str, default=str(DEFAULT_VAL_FILE),
@@ -471,7 +497,7 @@ def main():
     print(f"[Dataset] Loaded {len(val_pairs)} validation sentence pairs from {val_file.name}")
 
     # 4. Models to evaluate
-    targets = ["sarvam", "mt5", "rlm"] if args.model == "all" else [args.model]
+    targets = ["sarvam", "mt5", "rlm", "llama3"] if args.model == "all" else [args.model]
     all_results = {}
 
     for key in targets:

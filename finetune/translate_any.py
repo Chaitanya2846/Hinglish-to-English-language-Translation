@@ -28,6 +28,7 @@ MODELS = {
     "1": ("Google mT5-Small (300M Seq2Seq)", SCRIPT_DIR / "translate_mt5.py"),
     "2": ("Sarvam-1 (2B QLoRA - Best Fluency)", SCRIPT_DIR / "translate_sarvam.py"),
     "3": ("RLM-Gemma-2B (QLoRA - Causal LM)", SCRIPT_DIR / "translate_rlm.py"),
+    "4": ("Meta-Llama-3-8B (8B QLoRA - Flagship LLM)", SCRIPT_DIR / "translate_llama3.py"),
 }
 
 
@@ -39,10 +40,11 @@ def main():
     print("  [1] Google mT5-Small (300M)  — 🥇 19.94 BLEU (Fastest, CPU-friendly)")
     print("  [2] Sarvam-1 (2B)            — 🥈 17.30 BLEU, 41.56 chrF++ (Best fluency)")
     print("  [3] RLM-Gemma-2B             — 🥉 14.64 BLEU (Causal LM)")
+    print("  [4] Meta-Llama-3-8B (8B)     — 🦙 Flagship Foundation LLM (Colab/GPU)")
     print("  [q] Quit")
     print("-" * 70)
 
-    choice = input("Enter choice (1/2/3/q): ").strip().lower()
+    choice = input("Enter choice (1/2/3/4/q): ").strip().lower()
     if choice in ("q", "quit", "exit"):
         print("Goodbye!")
         return
