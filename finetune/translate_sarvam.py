@@ -72,17 +72,21 @@ def main():
             trust_remote_code=True,
         )
 
+    HF_REPO = "Nickhasntlost/sarvam-1-hinglish-lora"
     if (ADAPTER_DIR / "adapter_config.json").exists():
         print(f"[2/2] Attaching Fine-Tuned LoRA Adapter from {ADAPTER_DIR.name}...")
         model = PeftModel.from_pretrained(model, str(ADAPTER_DIR))
         print("  [+] LoRA Adapter attached successfully!")
     else:
-        print("  [!] Running base Sarvam-1 model (no adapter found).")
+        print(f"[2/2] Attaching Fine-Tuned LoRA Adapter from Hugging Face ({HF_REPO})...")
+        model = PeftModel.from_pretrained(model, HF_REPO)
+        print("  [+] LoRA Adapter attached successfully from Hugging Face!")
 
     model.eval()
     print(f"\nReady in {time.time()-t0:.1f}s! Type any Hinglish sentence or 'exit' to quit.\n")
 
     input_device = next(model.parameters()).device
+    beam_count = 4 if has_cuda else 1
 
     while True:
         try:
@@ -102,7 +106,7 @@ def main():
                 outputs = model.generate(
                     **inputs,
                     max_new_tokens=64,
-                    num_beams=4,
+                    num_beams=beam_count,
                     length_penalty=1.0,
                     no_repeat_ngram_size=3,
                     early_stopping=True,
