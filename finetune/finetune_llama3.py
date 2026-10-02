@@ -445,23 +445,38 @@ def main():
     # 8. Training Setup
     collator = CausalLMDataCollator(tokenizer=tokenizer, pad_to_multiple_of=8)
 
-    training_args = TrainingArguments(
-        output_dir=str(output_path / "checkpoints"),
-        num_train_epochs=args.epochs,
-        per_device_train_batch_size=args.batch_size,
-        gradient_accumulation_steps=args.grad_accum,
-        learning_rate=args.lr,
-        lr_scheduler_type="cosine",
-        warmup_ratio=0.05,
-        weight_decay=0.01,
-        fp16=True,
-        gradient_checkpointing=True,
-        logging_steps=10,
-        save_strategy="epoch",
-        save_total_limit=2,
-        optim="paged_adamw_8bit",
-        report_to="none",
-    )
+    import inspect
+    sig = inspect.signature(TrainingArguments.__init__).parameters
+
+    training_kwargs = {
+        "output_dir": str(output_path / "checkpoints"),
+        "num_train_epochs": args.epochs,
+        "per_device_train_batch_size": args.batch_size,
+        "gradient_accumulation_steps": args.grad_accum,
+        "learning_rate": args.lr,
+        "logging_steps": 10,
+        "save_strategy": "epoch",
+        "save_total_limit": 2,
+        "fp16": True,
+        "report_to": "none",
+        "remove_unused_columns": False,
+    }
+
+    if "optim" in sig:
+        training_kwargs["optim"] = "paged_adamw_8bit"
+    if "lr_scheduler_type" in sig:
+        training_kwargs["lr_scheduler_type"] = "cosine"
+    if "warmup_ratio" in sig:
+        training_kwargs["warmup_ratio"] = 0.05
+    elif "warmup_steps" in sig:
+        training_kwargs["warmup_steps"] = 50
+    if "weight_decay" in sig:
+        training_kwargs["weight_decay"] = 0.01
+    if "gradient_checkpointing" in sig:
+        training_kwargs["gradient_checkpointing"] = True
+
+    valid_args = {k: v for k, v in training_kwargs.items() if k in sig}
+    training_args = TrainingArguments(**valid_args)
 
     trainer = Trainer(
         model=model,
