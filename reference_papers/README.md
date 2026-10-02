@@ -42,7 +42,7 @@ All papers are verified, official conference versions from the **ACL Anthology**
 * **Title**: *Gemma: Open Models Based on Gemini Research and Technology*
 * **Authors**: Gemma Team, Google DeepMind (Thomas Mesnard, Cassidy Hardin, Robert Dadashi, Surya Bhupatiraju, et al.)
 * **Venue**: arXiv:2403.08295 (March 2024)
-* **Relevance**: **Model 3 Base Architecture**. Details Google's lightweight Gemma foundation models built from Gemini research, serving as the base model for our fine-tuned **RLM-Gemma-2B (v3)** causal translation model.
+* **Relevance**: **Model 3 Base Architecture**. Details Google's lightweight Gemma foundation models built from Gemini research, serving as the base model for our fine-tuned **RLM-Gemma-2B** causal translation model.
 
 ---
 

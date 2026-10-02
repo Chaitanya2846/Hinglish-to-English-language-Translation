@@ -33,7 +33,7 @@ MODELS_TO_UPLOAD = [
     {
         "local_dir": OUTPUTS_DIR / "rlm_hinglish_lora_v3",
         "repo_name": "rlm-gemma-2b-hinglish-lora",
-        "desc": "RLM-Gemma-2B (v3) QLoRA Adapter for Romanized Hinglish-to-English NMT",
+        "desc": "RLM-Gemma-2B QLoRA Adapter for Romanized Hinglish-to-English NMT",
     },
     {
         "local_dir": OUTPUTS_DIR / "mt5_hinglish_lora",

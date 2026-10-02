@@ -1,5 +1,5 @@
 """
-translate_rlm.py — Live Interactive Translation with RLM-Gemma-2B (v3 QLoRA)
+translate_rlm.py — Live Interactive Translation with RLM-Gemma-2B (QLoRA)
 =============================================================================
 Fine-Tuned Causal Decoder Model on Web-Scraped Social Media Corpus.
 Parameters: 2.0B | LoRA Rank r=64 | Trained with Masked Causal Cross-Entropy
@@ -31,7 +31,7 @@ PROMPT_TEMPLATE = "Hinglish:\n{source}\n\nEnglish:\n"
 
 def main():
     print("=" * 70)
-    print("  💎 RLM-Gemma-2B (v3 QLoRA) — Live Hinglish-to-English Translation")
+    print("  💎 RLM-Gemma-2B (QLoRA) — Live Hinglish-to-English Translation")
     print("  LoRA Capacity: r=64, alpha=128 | Causal Decoder Architecture")
     print("=" * 70)
 
@@ -73,7 +73,7 @@ def main():
     if (ADAPTER_DIR / "adapter_config.json").exists():
         print(f"[2/2] Attaching Fine-Tuned LoRA Adapter from {ADAPTER_DIR.name}...")
         model = PeftModel.from_pretrained(model, str(ADAPTER_DIR))
-        print("  [+] LoRA Adapter (v3) attached successfully!")
+        print("  [+] LoRA Adapter attached successfully!")
     else:
         print(f"[2/2] Attaching Fine-Tuned LoRA Adapter from Hugging Face ({HF_REPO})...")
         model = PeftModel.from_pretrained(model, HF_REPO)

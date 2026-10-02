@@ -156,7 +156,7 @@ MODEL_CONFIGS = {
         "trust_remote_code": True,
     },
     "rlm": {
-        "name": "RLM-Gemma-2B (v3 QLoRA)",
+        "name": "RLM-Gemma-2B (QLoRA)",
         "type": "causal",
         "base": "rudrashah/RLM-hinglish-translator",
         "hf_adapter": "Nickhasntlost/rlm-gemma-2b-hinglish-lora",

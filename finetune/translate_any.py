@@ -4,7 +4,7 @@ translate_any.py — Multi-Model Interactive Translation Hub
 Switch effortlessly between all fine-tuned Hinglish-to-English models:
   [1] Google mT5-Small (300M Seq2Seq LoRA) — 54.11 BLEU
   [2] Sarvam-1 (2B QLoRA)                 — 52.66 BLEU, 66.85 chrF++, 49.04 ROUGE-1
-  [3] RLM-Gemma-2B (v3 QLoRA)             — 22.40 BLEU, rank r=64
+  [3] RLM-Gemma-2B (QLoRA)                — 22.40 BLEU, rank r=64
 
 Run:
     .venv\\Scripts\\python finetune/translate_any.py
@@ -27,7 +27,7 @@ PYTHON_EXE = sys.executable
 MODELS = {
     "1": ("Google mT5-Small (300M Seq2Seq)", SCRIPT_DIR / "translate_mt5.py"),
     "2": ("Sarvam-1 (2B QLoRA - Best Fluency)", SCRIPT_DIR / "translate_sarvam.py"),
-    "3": ("RLM-Gemma-2B (v3 QLoRA - Causal LM)", SCRIPT_DIR / "translate_rlm.py"),
+    "3": ("RLM-Gemma-2B (QLoRA - Causal LM)", SCRIPT_DIR / "translate_rlm.py"),
 }
 
 
@@ -38,7 +38,7 @@ def main():
     print("Select a model to launch:\n")
     print("  [1] Google mT5-Small (300M)  — 🥇 54.11 BLEU (Fastest, CPU-friendly)")
     print("  [2] Sarvam-1 (2B)            — 🥈 52.66 BLEU, 66.85 chrF++ (Best fluency)")
-    print("  [3] RLM-Gemma-2B (v3)        — 🥉 22.40 BLEU (Instruction fine-tuned)")
+    print("  [3] RLM-Gemma-2B             — 🥉 22.40 BLEU (Instruction fine-tuned)")
     print("  [q] Quit")
     print("-" * 70)
 
