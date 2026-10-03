@@ -243,41 +243,23 @@ def main():
         Seq2SeqTrainer,
         DataCollatorForSeq2Seq,
     )
-    from transformers.models.m2m_100.modeling_m2m_100 import (
-        M2M100ForConditionalGeneration,
-        M2M100Model,
-        M2M100Decoder,
-    )
+    from transformers.models.m2m_100.modeling_m2m_100 import M2M100Decoder
     from peft import LoraConfig, get_peft_model, TaskType, prepare_model_for_kbit_training
 
-    # Robust 3-layer patch using bound signatures so positional AND keyword arguments are handled
-    _orig_m2m100_cg_forward = M2M100ForConditionalGeneration.forward
-    _orig_m2m100_model_forward = M2M100Model.forward
+    # Safely ensure M2M100Decoder receives only one input representation
     _orig_m2m100_decoder_forward = M2M100Decoder.forward
 
-    def _safe_m2m100_cg_forward(self, *args, **kwargs):
-        bound = inspect.signature(_orig_m2m100_cg_forward).bind(self, *args, **kwargs)
-        bound.apply_defaults()
-        if bound.arguments.get("decoder_inputs_embeds") is not None:
-            bound.arguments["decoder_inputs_embeds"] = None
-        return _orig_m2m100_cg_forward(*bound.args, **bound.kwargs)
-
-    def _safe_m2m100_model_forward(self, *args, **kwargs):
-        bound = inspect.signature(_orig_m2m100_model_forward).bind(self, *args, **kwargs)
-        bound.apply_defaults()
-        if bound.arguments.get("decoder_inputs_embeds") is not None:
-            bound.arguments["decoder_inputs_embeds"] = None
-        return _orig_m2m100_model_forward(*bound.args, **bound.kwargs)
-
     def _safe_m2m100_decoder_forward(self, *args, **kwargs):
-        bound = inspect.signature(_orig_m2m100_decoder_forward).bind(self, *args, **kwargs)
-        bound.apply_defaults()
-        if bound.arguments.get("input_ids") is not None and bound.arguments.get("inputs_embeds") is not None:
-            bound.arguments["inputs_embeds"] = None
-        return _orig_m2m100_decoder_forward(*bound.args, **bound.kwargs)
+        has_input_ids = (len(args) > 0 and args[0] is not None) or (kwargs.get("input_ids") is not None)
+        if has_input_ids:
+            if "inputs_embeds" in kwargs:
+                kwargs["inputs_embeds"] = None
+            if len(args) > 7 and args[7] is not None:
+                args = list(args)
+                args[7] = None
+                args = tuple(args)
+        return _orig_m2m100_decoder_forward(self, *args, **kwargs)
 
-    M2M100ForConditionalGeneration.forward = _safe_m2m100_cg_forward
-    M2M100Model.forward = _safe_m2m100_model_forward
     M2M100Decoder.forward = _safe_m2m100_decoder_forward
 
     tokenizer = AutoTokenizer.from_pretrained(
@@ -342,7 +324,6 @@ def main():
             model = AutoModelForSeq2SeqLM.from_pretrained(
                 args.base_model,
                 torch_dtype=torch.float16,
-                device_map="auto",
             )
     else:
         print("  ⚠️  Notice: Running on CPU.")
