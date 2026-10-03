@@ -1,5 +1,5 @@
 """
-translate_mt5.py — Live Interactive Translation with Google mT5-Small (54.11 BLEU)
+translate_mt5.py — Live Interactive Translation with Google mT5-Small (19.94 BLEU)
 ===================================================================================
 Run:
     .venv\\Scripts\\python finetune/translate_mt5.py
@@ -29,7 +29,7 @@ PREFIX = "translate Hinglish to English: "
 def main():
     print("=" * 65)
     print("  Hinglish-to-English Live Translation (Google mT5-Small LoRA)")
-    print("  Model BLEU Score: 54.11 | BERTScore: 0.9071 | CPU Mode")
+    print("  Model BLEU Score: 19.94 | BERTScore: 0.9061 | CPU Mode")
     print("=" * 65)
 
     print("\n[1/2] Loading Tokenizer & Model into RAM...")

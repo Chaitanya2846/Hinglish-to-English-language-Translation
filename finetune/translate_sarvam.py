@@ -2,7 +2,7 @@
 translate_sarvam.py — Live Interactive Translation with Sarvam-1 (2B QLoRA)
 =============================================================================
 Flagship 2B Indic Foundation Model by Sarvam AI.
-Scored: 52.66 BLEU | 66.85 chrF++ | 49.04 ROUGE-1 | 47.00 METEOR | 0.9017 BERTScore
+Scored: 17.30 BLEU | 41.56 chrF++ | 49.18 ROUGE-1 | 47.16 METEOR | 0.9020 BERTScore
 
 Run:
     .venv\\Scripts\\python finetune/translate_sarvam.py
@@ -32,7 +32,7 @@ PROMPT_TEMPLATE = "Translate Hinglish to English.\nHinglish: {source}\nEnglish:"
 def main():
     print("=" * 70)
     print("  🇮🇳 Sarvam-1 (2B) — Live Hinglish-to-English Translation")
-    print("  Benchmark: 52.66 BLEU | 66.85 chrF++ | 49.04 ROUGE-1 | 47.00 METEOR")
+    print("  Benchmark: 17.30 BLEU | 41.56 chrF++ | 49.18 ROUGE-1 | 47.16 METEOR")
     print("=" * 70)
 
     has_cuda = torch.cuda.is_available()
