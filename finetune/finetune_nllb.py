@@ -28,6 +28,7 @@ from typing import Dict, List, Optional, Tuple
 
 import torch
 from datasets import Dataset
+from transformers import DataCollatorForSeq2Seq
 
 # UTF-8 terminal encoding on Windows
 if sys.platform == "win32":
@@ -181,6 +182,30 @@ def evaluate_model(
     return metrics, predictions
 
 
+class Seq2SeqCollatorWithDecoderIds(DataCollatorForSeq2Seq):
+    """Pads inputs/labels AND builds `decoder_input_ids` (labels shifted right).
+
+    Why this is needed: with `label_smoothing_factor > 0` the HF Trainer pops
+    `labels` out of the batch before calling the model, so the model can no longer
+    build decoder inputs itself. Without decoder_input_ids the M2M100/NLLB decoder
+    raises "You cannot specify both decoder_input_ids and decoder_inputs_embeds".
+    """
+
+    def __init__(self, *args, decoder_start_token_id: int, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.decoder_start_token_id = decoder_start_token_id
+
+    def __call__(self, features, return_tensors=None):
+        batch = super().__call__(features, return_tensors)
+        if "labels" in batch and "decoder_input_ids" not in batch:
+            labels = batch["labels"]
+            dec = labels.new_full(labels.shape, self.decoder_start_token_id)
+            dec[:, 1:] = labels[:, :-1].clone()
+            dec.masked_fill_(dec == -100, self.tokenizer.pad_token_id)
+            batch["decoder_input_ids"] = dec
+        return batch
+
+
 def main():
     parser = argparse.ArgumentParser(description="Fine-Tuning for facebook/nllb-200-distilled-1.3B on Hinglish Translation")
     parser.add_argument("--base_model", type=str, default=DEFAULT_BASE_MODEL, help="Base HuggingFace repo")
@@ -241,26 +266,8 @@ def main():
         BitsAndBytesConfig,
         Seq2SeqTrainingArguments,
         Seq2SeqTrainer,
-        DataCollatorForSeq2Seq,
     )
-    from transformers.models.m2m_100.modeling_m2m_100 import M2M100Decoder
     from peft import LoraConfig, get_peft_model, TaskType, prepare_model_for_kbit_training
-
-    # Safely ensure M2M100Decoder receives only one input representation
-    _orig_m2m100_decoder_forward = M2M100Decoder.forward
-
-    def _safe_m2m100_decoder_forward(self, *args, **kwargs):
-        has_input_ids = (len(args) > 0 and args[0] is not None) or (kwargs.get("input_ids") is not None)
-        if has_input_ids:
-            if "inputs_embeds" in kwargs:
-                kwargs["inputs_embeds"] = None
-            if len(args) > 7 and args[7] is not None:
-                args = list(args)
-                args[7] = None
-                args = tuple(args)
-        return _orig_m2m100_decoder_forward(self, *args, **kwargs)
-
-    M2M100Decoder.forward = _safe_m2m100_decoder_forward
 
     tokenizer = AutoTokenizer.from_pretrained(
         args.base_model,
@@ -321,17 +328,16 @@ def main():
             )
             model = prepare_model_for_kbit_training(model)
         else:
-            model = AutoModelForSeq2SeqLM.from_pretrained(
-                args.base_model,
-                torch_dtype=torch.float16,
-            )
+            try:
+                model = AutoModelForSeq2SeqLM.from_pretrained(args.base_model, dtype=torch.float16)
+            except TypeError:  # older transformers
+                model = AutoModelForSeq2SeqLM.from_pretrained(args.base_model, torch_dtype=torch.float16)
     else:
         print("  ⚠️  Notice: Running on CPU.")
-        model = AutoModelForSeq2SeqLM.from_pretrained(
-            args.base_model,
-            torch_dtype=torch.float32,
-            low_cpu_mem_usage=True,
-        )
+        try:
+            model = AutoModelForSeq2SeqLM.from_pretrained(args.base_model, dtype=torch.float32)
+        except TypeError:
+            model = AutoModelForSeq2SeqLM.from_pretrained(args.base_model, torch_dtype=torch.float32)
 
     print(f"  Model loaded in {time.time() - t0:.1f}s")
 
@@ -350,6 +356,9 @@ def main():
     )
 
     model = get_peft_model(model, lora_config)
+    for _, p in model.named_parameters():
+        if p.requires_grad and p.dtype != torch.float32:
+            p.data = p.data.float()
     print("\n  Trainable Parameters Summary:")
     model.print_trainable_parameters()
 
@@ -388,11 +397,15 @@ def main():
     valid_args = {k: v for k, v in training_kwargs.items() if k in sig}
     training_args = Seq2SeqTrainingArguments(**valid_args)
 
-    data_collator = DataCollatorForSeq2Seq(
+    decoder_start_token_id = model.get_base_model().config.decoder_start_token_id
+    if decoder_start_token_id is None:
+        decoder_start_token_id = tokenizer.eos_token_id
+    data_collator = Seq2SeqCollatorWithDecoderIds(
         tokenizer=tokenizer,
         model=None,
         pad_to_multiple_of=8 if device == "cuda" else None,
         label_pad_token_id=-100,
+        decoder_start_token_id=decoder_start_token_id,
     )
 
     trainer = Seq2SeqTrainer(
@@ -414,6 +427,13 @@ def main():
     print(f"\nSaving fine-tuned LoRA adapter to: {output_path}...")
     model.save_pretrained(str(output_path))
     tokenizer.save_pretrained(str(output_path))
+
+    # Re-enable KV cache (disabled by gradient checkpointing) for fast generation
+    model.config.use_cache = True
+    try:
+        model.base_model.model.config.use_cache = True
+    except Exception:
+        pass
 
     # Evaluate on held-out validation sample
     metrics, _ = evaluate_model(
