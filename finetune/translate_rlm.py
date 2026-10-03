@@ -49,19 +49,28 @@ def main():
     tokenizer.padding_side = "left"
 
     if has_cuda:
-        from transformers import BitsAndBytesConfig
-        bnb_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.float16,
-            bnb_4bit_use_double_quant=True,
-        )
-        model = AutoModelForCausalLM.from_pretrained(
-            MODEL_ID,
-            quantization_config=bnb_config,
-            device_map="auto",
-            torch_dtype=torch.float16,
-        )
+        try:
+            import bitsandbytes
+            from transformers import BitsAndBytesConfig
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_use_double_quant=True,
+            )
+            model = AutoModelForCausalLM.from_pretrained(
+                MODEL_ID,
+                quantization_config=bnb_config,
+                device_map="auto",
+                torch_dtype=torch.float16,
+            )
+        except (ImportError, Exception) as e:
+            print("  [i] bitsandbytes not found. Running natively in FP16 on GPU (~4GB VRAM)...")
+            model = AutoModelForCausalLM.from_pretrained(
+                MODEL_ID,
+                device_map="auto",
+                torch_dtype=torch.float16,
+            )
     else:
         model = AutoModelForCausalLM.from_pretrained(
             MODEL_ID,
