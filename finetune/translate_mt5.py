@@ -38,10 +38,14 @@ def main():
     model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_ID, torch_dtype=torch.float32)
 
     HF_REPO = "Nickhasntlost/mt5-small-hinglish-lora"
-    if (ADAPTER_DIR / "adapter_config.json").exists():
+    has_local_weights = (
+        (ADAPTER_DIR / "adapter_model.safetensors").exists()
+        or (ADAPTER_DIR / "adapter_model.bin").exists()
+    )
+    if has_local_weights:
         print(f"[2/2] Attaching Fine-Tuned LoRA Adapter from {ADAPTER_DIR.name}...")
         model = PeftModel.from_pretrained(model, str(ADAPTER_DIR))
-        print("  [+] Fine-tuned weights active!")
+        print("  [+] Fine-tuned weights active from local directory!")
     else:
         print(f"[2/2] Attaching Fine-Tuned LoRA Adapter from Hugging Face ({HF_REPO})...")
         model = PeftModel.from_pretrained(model, HF_REPO)
