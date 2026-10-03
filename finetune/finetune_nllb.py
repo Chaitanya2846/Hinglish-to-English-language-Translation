@@ -243,23 +243,42 @@ def main():
         Seq2SeqTrainer,
         DataCollatorForSeq2Seq,
     )
-    from transformers.models.m2m_100.modeling_m2m_100 import M2M100ForConditionalGeneration, M2M100Model
+    from transformers.models.m2m_100.modeling_m2m_100 import (
+        M2M100ForConditionalGeneration,
+        M2M100Model,
+        M2M100Decoder,
+    )
     from peft import LoraConfig, get_peft_model, TaskType, prepare_model_for_kbit_training
 
-    # Patch M2M100 forward methods to prevent conflicting decoder inputs when PEFT / collators are used
+    # Robust 3-layer patch using bound signatures so positional AND keyword arguments are handled
     _orig_m2m100_cg_forward = M2M100ForConditionalGeneration.forward
-    def _safe_m2m100_cg_forward(self, *args, **kwargs):
-        if kwargs.get("decoder_input_ids") is not None and kwargs.get("decoder_inputs_embeds") is not None:
-            kwargs["decoder_inputs_embeds"] = None
-        return _orig_m2m100_cg_forward(self, *args, **kwargs)
-    M2M100ForConditionalGeneration.forward = _safe_m2m100_cg_forward
-
     _orig_m2m100_model_forward = M2M100Model.forward
+    _orig_m2m100_decoder_forward = M2M100Decoder.forward
+
+    def _safe_m2m100_cg_forward(self, *args, **kwargs):
+        bound = inspect.signature(_orig_m2m100_cg_forward).bind(self, *args, **kwargs)
+        bound.apply_defaults()
+        if bound.arguments.get("decoder_inputs_embeds") is not None:
+            bound.arguments["decoder_inputs_embeds"] = None
+        return _orig_m2m100_cg_forward(*bound.args, **bound.kwargs)
+
     def _safe_m2m100_model_forward(self, *args, **kwargs):
-        if kwargs.get("decoder_input_ids") is not None and kwargs.get("decoder_inputs_embeds") is not None:
-            kwargs["decoder_inputs_embeds"] = None
-        return _orig_m2m100_model_forward(self, *args, **kwargs)
+        bound = inspect.signature(_orig_m2m100_model_forward).bind(self, *args, **kwargs)
+        bound.apply_defaults()
+        if bound.arguments.get("decoder_inputs_embeds") is not None:
+            bound.arguments["decoder_inputs_embeds"] = None
+        return _orig_m2m100_model_forward(*bound.args, **bound.kwargs)
+
+    def _safe_m2m100_decoder_forward(self, *args, **kwargs):
+        bound = inspect.signature(_orig_m2m100_decoder_forward).bind(self, *args, **kwargs)
+        bound.apply_defaults()
+        if bound.arguments.get("input_ids") is not None and bound.arguments.get("inputs_embeds") is not None:
+            bound.arguments["inputs_embeds"] = None
+        return _orig_m2m100_decoder_forward(*bound.args, **bound.kwargs)
+
+    M2M100ForConditionalGeneration.forward = _safe_m2m100_cg_forward
     M2M100Model.forward = _safe_m2m100_model_forward
+    M2M100Decoder.forward = _safe_m2m100_decoder_forward
 
     tokenizer = AutoTokenizer.from_pretrained(
         args.base_model,
