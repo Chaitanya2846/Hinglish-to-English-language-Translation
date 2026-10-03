@@ -195,7 +195,7 @@ def main():
     parser.add_argument("--combine_phinc", action="store_true", help="Also include PHINC dataset for augmented training volume")
     parser.add_argument("--eval_samples", type=int, default=150, help="Number of validation samples to evaluate post-training")
     parser.add_argument("--fp16", action="store_true", default=True, help="Use FP16 precision")
-    parser.add_argument("--load_in_4bit", action="store_true", default=True, help="Use 4-bit NormalFloat (NF4) quantization")
+    parser.add_argument("--load_in_4bit", action="store_true", default=False, help="Use 4-bit NormalFloat (NF4) quantization")
     args = parser.parse_args()
 
     output_path = Path(args.output_dir)
@@ -243,7 +243,23 @@ def main():
         Seq2SeqTrainer,
         DataCollatorForSeq2Seq,
     )
+    from transformers.models.m2m_100.modeling_m2m_100 import M2M100ForConditionalGeneration, M2M100Model
     from peft import LoraConfig, get_peft_model, TaskType, prepare_model_for_kbit_training
+
+    # Patch M2M100 forward methods to prevent conflicting decoder inputs when PEFT / collators are used
+    _orig_m2m100_cg_forward = M2M100ForConditionalGeneration.forward
+    def _safe_m2m100_cg_forward(self, *args, **kwargs):
+        if kwargs.get("decoder_input_ids") is not None and kwargs.get("decoder_inputs_embeds") is not None:
+            kwargs["decoder_inputs_embeds"] = None
+        return _orig_m2m100_cg_forward(self, *args, **kwargs)
+    M2M100ForConditionalGeneration.forward = _safe_m2m100_cg_forward
+
+    _orig_m2m100_model_forward = M2M100Model.forward
+    def _safe_m2m100_model_forward(self, *args, **kwargs):
+        if kwargs.get("decoder_input_ids") is not None and kwargs.get("decoder_inputs_embeds") is not None:
+            kwargs["decoder_inputs_embeds"] = None
+        return _orig_m2m100_model_forward(self, *args, **kwargs)
+    M2M100Model.forward = _safe_m2m100_model_forward
 
     tokenizer = AutoTokenizer.from_pretrained(
         args.base_model,
@@ -364,6 +380,8 @@ def main():
         training_kwargs["weight_decay"] = 0.01
     if "gradient_checkpointing" in sig:
         training_kwargs["gradient_checkpointing"] = True
+        if "gradient_checkpointing_kwargs" in sig:
+            training_kwargs["gradient_checkpointing_kwargs"] = {"use_reentrant": False}
     if "predict_with_generate" in sig:
         training_kwargs["predict_with_generate"] = False
 
@@ -372,7 +390,7 @@ def main():
 
     data_collator = DataCollatorForSeq2Seq(
         tokenizer=tokenizer,
-        model=model,
+        model=None,
         pad_to_multiple_of=8 if device == "cuda" else None,
         label_pad_token_id=-100,
     )
