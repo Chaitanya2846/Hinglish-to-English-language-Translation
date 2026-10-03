@@ -125,8 +125,8 @@ def compute_all_metrics(predictions, references):
     results = {}
     try:
         import sacrebleu
-        results["BLEU"] = round(sacrebleu.corpus_bleu(predictions, [[r] for r in references]).score, 2)
-        results["chrF++"] = round(sacrebleu.corpus_chrf(predictions, [[r] for r in references], word_order=2).score, 2)
+        results["BLEU"] = round(sacrebleu.corpus_bleu(predictions, [references], smooth_method="exp").score, 2)
+        results["chrF++"] = round(sacrebleu.corpus_chrf(predictions, [references], word_order=2).score, 2)
     except Exception:
         results["BLEU"] = results["chrF++"] = 0.0
     try:
@@ -237,10 +237,21 @@ def main():
     if "weight_decay" in sig: args_dict["weight_decay"] = 0.01
     if "warmup_ratio" in sig: args_dict["warmup_ratio"] = 0.10
 
+    checkpoint_dir = OUTPUT_DIR / "checkpoints"
+    resume_checkpoint = None
+    if checkpoint_dir.exists():
+        checkpoints = sorted(
+            checkpoint_dir.glob("checkpoint-*"),
+            key=lambda p: int(p.name.split("-")[-1]) if p.name.split("-")[-1].isdigit() else 0
+        )
+        if checkpoints:
+            resume_checkpoint = str(checkpoints[-1])
+            print(f"  [+] Resuming training from checkpoint: {resume_checkpoint}")
+
     print(f"\n[5/5] Training for {NUM_EPOCHS} epochs...")
     trainer = Trainer(model=model, args=TrainingArguments(**args_dict),
         train_dataset=train_dataset, eval_dataset=val_dataset, data_collator=CausalLMDataCollator(tokenizer=tokenizer))
-    trainer.train()
+    trainer.train(resume_from_checkpoint=resume_checkpoint)
 
     print(f"\nSaving LoRA adapter to {OUTPUT_DIR}...")
     model.save_pretrained(OUTPUT_DIR)

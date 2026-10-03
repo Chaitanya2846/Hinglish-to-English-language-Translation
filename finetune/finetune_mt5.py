@@ -75,8 +75,8 @@ def compute_all_metrics(predictions, references):
     results = {}
     try:
         import sacrebleu
-        results["BLEU"] = round(sacrebleu.corpus_bleu(predictions, [[r] for r in references]).score, 2)
-        results["chrF++"] = round(sacrebleu.corpus_chrf(predictions, [[r] for r in references], word_order=2).score, 2)
+        results["BLEU"] = round(sacrebleu.corpus_bleu(predictions, [references], smooth_method="exp").score, 2)
+        results["chrF++"] = round(sacrebleu.corpus_chrf(predictions, [references], word_order=2).score, 2)
     except Exception:
         results["BLEU"] = results["chrF++"] = 0.0
     try:
