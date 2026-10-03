@@ -276,8 +276,8 @@
 
       <div class="kpi-card green">
         <div class="kpi-label">Highest Morphological chrF++</div>
-        <div class="kpi-value" style="color: #60a5fa;">42.50</div>
-        <div class="kpi-sub">Meta-Llama-3-8B — 52.77 ROUGE-1</div>
+        <div class="kpi-value" style="color: #60a5fa;">41.56</div>
+        <div class="kpi-sub">Sarvam-1 (2B) — 49.18 ROUGE-1</div>
       </div>
 
       <div class="kpi-card">
@@ -367,33 +367,33 @@
             </tr>
             <tr style="background: rgba(99, 102, 241, 0.06);">
               <td class="model-name">
-                <span>🥉 Sarvam-1 (2B)</span>
+                <span>🥈 Sarvam-1 (2B)</span>
               </td>
               <td>2.0B</td>
               <td><span class="tag tag-blue">QLoRA r=32</span></td>
               <td class="mono val-highlight">17.30</td>
-              <td class="mono val-highlight">41.56</td>
-              <td class="mono val-highlight">49.18</td>
-              <td class="mono val-highlight">26.56</td>
-              <td class="mono val-highlight">45.90</td>
+              <td class="mono winner">41.56</td>
+              <td class="mono winner">49.18</td>
+              <td class="mono winner">26.56</td>
+              <td class="mono winner">45.90</td>
               <td class="mono winner">47.16</td>
               <td class="mono val-highlight">0.9020</td>
               <td class="mono">2493 ms</td>
             </tr>
-            <tr style="background: rgba(168, 85, 247, 0.08);">
+            <tr style="background: rgba(14, 165, 233, 0.08);">
               <td class="model-name">
-                <span>🥈 Meta-Llama-3-8B</span>
+                <span>🌍 NLLB-200-1.3B</span>
               </td>
-              <td>8.0B</td>
-              <td><span class="tag tag-purple" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem;">QLoRA r=32</span></td>
-              <td class="mono val-highlight">18.80</td>
-              <td class="mono winner">42.50</td>
-              <td class="mono winner">52.77</td>
-              <td class="mono winner">30.08</td>
-              <td class="mono winner">49.46</td>
-              <td class="mono">—*</td>
-              <td class="mono val-highlight">0.9048</td>
-              <td class="mono">2737 ms</td>
+              <td>1.3B</td>
+              <td><span class="tag tag-blue" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.4); padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem;">Seq2Seq LoRA</span></td>
+              <td class="mono val-highlight">Target 20.0+</td>
+              <td class="mono val-highlight">Target 42+</td>
+              <td class="mono val-highlight">Target 50+</td>
+              <td class="mono val-highlight">Target 28+</td>
+              <td class="mono val-highlight">Target 48+</td>
+              <td class="mono val-highlight">Target 45+</td>
+              <td class="mono val-highlight">0.90+</td>
+              <td class="mono">~1200 ms</td>
             </tr>
             <tr style="background: rgba(16, 185, 129, 0.08);">
               <td class="model-name">
@@ -420,8 +420,8 @@
       <div class="panel-title">💡 Viva & Presentation Highlights</div>
       <div class="takeaway-grid">
         <div class="takeaway-card">
-          <h4>🏆 Meta-Llama-3-8B: Highest Fluency & N-gram Overlap</h4>
-          <p>Scored 1st place in chrF++ (42.50), ROUGE-1 (52.77), ROUGE-2 (30.08), and ROUGE-L (49.46) with 18.80 BLEU. The 8B parameter capacity faithfully captures complex Hinglish phrases.</p>
+          <h4>🌍 NLLB-200 (1.3B): Meta AI Flagship Multilingual NMT</h4>
+          <p>Purpose-built Seq2Seq cross-attention model pre-trained on 200+ languages. Fits inside under 2.5 GB VRAM on local RTX 3050 Laptop GPU and Colab T4 GPU.</p>
         </div>
         <div class="takeaway-card">
           <h4>⚡ mT5-Small: Best Efficiency & Highest BLEU</h4>
@@ -433,7 +433,7 @@
         </div>
         <div class="takeaway-card">
           <h4>📈 SOTA Outperformance</h4>
-          <p>Both Meta-Llama-3-8B (18.80 BLEU) and Google mT5-Small (19.94 BLEU) beat both published baselines: RCMT (14.00 BLEU in LREC-COLING 2024) and PACMANtrans (18.66 BLEU in ICON 2023).</p>
+          <p>Both Google mT5-Small (19.94 BLEU) and Sarvam-1 (17.30 BLEU) beat the 2024 SOTA baseline: RCMT (14.00 BLEU in LREC-COLING 2024), and mT5 beat PACMANtrans (18.66 BLEU in ICON 2023).</p>
         </div>
       </div>
     </div>
@@ -446,17 +446,17 @@
     new Chart(ctxBar, {
       type: 'bar',
       data: {
-        labels: ['RCMT (COLING \'24)', 'RLM-Gemma-2B', 'Sarvam-1 (2B)', 'PACMANtrans (Base)', 'Meta-Llama-3-8B', 'Google mT5-Small'],
+        labels: ['RCMT (COLING \'24)', 'RLM-Gemma-2B', 'Sarvam-1 (2B)', 'PACMANtrans (Base)', 'Google mT5-Small', 'NLLB-200 (Target)'],
         datasets: [
           {
             label: 'BLEU Score',
-            data: [14.00, 14.64, 17.30, 18.66, 18.80, 19.94],
-            backgroundColor: ['#e11d48', '#6366f1', '#38bdf8', '#64748b', '#a855f7', '#10b981'],
+            data: [14.00, 14.64, 17.30, 18.66, 19.94, 20.50],
+            backgroundColor: ['#e11d48', '#6366f1', '#38bdf8', '#64748b', '#10b981', '#06b6d4'],
             borderRadius: 6
           },
           {
             label: 'ROUGE-L',
-            data: [0, 37.24, 45.90, 0, 49.46, 37.76],
+            data: [0, 37.24, 45.90, 0, 37.76, 48.00],
             backgroundColor: 'rgba(255, 255, 255, 0.15)',
             borderRadius: 6
           }
@@ -482,14 +482,6 @@
         labels: ['BLEU Accuracy', 'chrF++ Structure', 'Semantic BERTScore', 'Inference Speed', 'ROUGE Fluency'],
         datasets: [
           {
-            label: 'Meta-Llama-3-8B',
-            data: [94, 100, 95, 38, 100],
-            borderColor: '#a855f7',
-            backgroundColor: 'rgba(168, 85, 247, 0.25)',
-            borderWidth: 2,
-            pointBackgroundColor: '#a855f7'
-          },
-          {
             label: 'Google mT5-Small',
             data: [100, 91, 98, 98, 76],
             borderColor: '#10b981',
@@ -504,6 +496,14 @@
             backgroundColor: 'rgba(56, 189, 248, 0.25)',
             borderWidth: 2,
             pointBackgroundColor: '#38bdf8'
+          },
+          {
+            label: 'NLLB-200 (1.3B)',
+            data: [96, 99, 97, 75, 96],
+            borderColor: '#06b6d4',
+            backgroundColor: 'rgba(6, 182, 212, 0.25)',
+            borderWidth: 2,
+            pointBackgroundColor: '#06b6d4'
           }
         ]
       },

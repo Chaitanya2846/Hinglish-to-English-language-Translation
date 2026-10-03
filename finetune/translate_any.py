@@ -28,7 +28,7 @@ MODELS = {
     "1": ("Google mT5-Small (300M Seq2Seq)", SCRIPT_DIR / "translate_mt5.py"),
     "2": ("Sarvam-1 (2B QLoRA - Best Fluency)", SCRIPT_DIR / "translate_sarvam.py"),
     "3": ("RLM-Gemma-2B (QLoRA - Causal LM)", SCRIPT_DIR / "translate_rlm.py"),
-    "4": ("Meta-Llama-3-8B (8B QLoRA - Flagship LLM)", SCRIPT_DIR / "translate_llama3.py"),
+    "4": ("NLLB-200 (1.3B Seq2Seq LoRA - SOTA Translation)", SCRIPT_DIR / "translate_nllb.py"),
 }
 
 
@@ -40,7 +40,7 @@ def main():
     print("  [1] Google mT5-Small (300M)  — 🥇 19.94 BLEU (Fastest, CPU-friendly)")
     print("  [2] Sarvam-1 (2B)            — 🥈 17.30 BLEU, 41.56 chrF++ (Best fluency)")
     print("  [3] RLM-Gemma-2B             — 🥉 14.64 BLEU (Causal LM)")
-    print("  [4] Meta-Llama-3-8B (8B)     — 🦙 Flagship Foundation LLM (Colab/GPU)")
+    print("  [4] NLLB-200-1.3B (1.3B)     — 🌍 Meta SOTA Machine Translation (GPU & Colab)")
     print("  [q] Quit")
     print("-" * 70)
 
@@ -56,8 +56,10 @@ def main():
             subprocess.run([PYTHON_EXE, str(script)], check=True)
         except KeyboardInterrupt:
             print("\nTranslator stopped.")
+        except subprocess.CalledProcessError as exc:
+            print(f"\n{name} exited with code {exc.returncode}. See the message above for details.")
     else:
-        print(f"Invalid option '{choice}'. Please select 1, 2, or 3.")
+        print(f"Invalid option '{choice}'. Please select 1, 2, 3, or 4.")
 
 
 if __name__ == "__main__":

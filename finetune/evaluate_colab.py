@@ -112,7 +112,7 @@ def auto_extract_adapters(search_dirs: List[Path], output_dir: Path):
         "sarvam": ("sarvam_hinglish_lora.zip", output_dir / "sarvam_hinglish_lora"),
         "rlm": ("rlm_hinglish_lora_v3.zip", output_dir / "rlm_hinglish_lora_v3"),
         "mt5": ("mt5_hinglish_lora.zip", output_dir / "mt5_hinglish_lora"),
-        "llama3": ("llama3_hinglish_lora.zip", output_dir / "llama3_hinglish_lora"),
+        "nllb": ("nllb_hinglish_lora.zip", output_dir / "nllb_hinglish_lora"),
     }
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -177,14 +177,14 @@ MODEL_CONFIGS = {
         "num_beams": 4,
         "trust_remote_code": False,
     },
-    "llama3": {
-        "name": "Meta-Llama-3-8B (8B QLoRA)",
-        "type": "causal",
-        "base": "meta-llama/Meta-Llama-3-8B",
-        "hf_adapter": "Nickhasntlost/llama-3-8b-hinglish-lora",
-        "adapter_rel": "llama3_hinglish_lora",
-        "prompt_template": "Translate the following Romanized Hinglish text to fluent English.\nHinglish: {source}\nEnglish:",
-        "extract_key": "English:",
+    "nllb": {
+        "name": "NLLB-200 (1.3B Seq2Seq LoRA)",
+        "type": "seq2seq",
+        "base": "facebook/nllb-200-distilled-1.3B",
+        "hf_adapter": "Nickhasntlost/nllb-200-1.3b-hinglish-lora",
+        "adapter_rel": "nllb_hinglish_lora",
+        "src_lang": "hin_Deva",
+        "tgt_lang": "eng_Latn",
         "num_beams": 4,
         "trust_remote_code": False,
     },
@@ -360,9 +360,29 @@ def evaluate_seq2seq_model(config: dict, adapter_path: Path, val_pairs: List[Dic
     from peft import PeftModel
 
     print(f"\n[1/3] Loading Tokenizer & Seq2Seq Base Model ({config['base']})...")
-    tokenizer = AutoTokenizer.from_pretrained(config["base"])
-    # Note: Keep FP32 / bfloat16 for T5/mT5 to prevent RMSNorm underflow/overflow
-    model = AutoModelForSeq2SeqLM.from_pretrained(config["base"], torch_dtype=torch.float32)
+    tok_kwargs = {}
+    if config.get("src_lang"):
+        tok_kwargs["src_lang"] = config["src_lang"]
+    if config.get("tgt_lang"):
+        tok_kwargs["tgt_lang"] = config["tgt_lang"]
+    tokenizer = AutoTokenizer.from_pretrained(config["base"], **tok_kwargs)
+
+    forced_bos_token_id = None
+    if config.get("tgt_lang"):
+        forced_bos_token_id = tokenizer.convert_tokens_to_ids(config["tgt_lang"])
+
+    if "nllb" in config["base"].lower():
+        if device == "cuda":
+            from transformers import BitsAndBytesConfig
+            bnb_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.float16)
+            model = AutoModelForSeq2SeqLM.from_pretrained(config["base"], quantization_config=bnb_config, device_map="auto")
+        else:
+            model = AutoModelForSeq2SeqLM.from_pretrained(config["base"], torch_dtype=torch.float32, low_cpu_mem_usage=True)
+    else:
+        # Note: Keep FP32 / bfloat16 for T5/mT5 to prevent RMSNorm underflow/overflow
+        model = AutoModelForSeq2SeqLM.from_pretrained(config["base"], torch_dtype=torch.float32)
+        if device == "cuda":
+            model = model.cuda()
 
     print(f"[2/3] Attaching LoRA Adapter...")
     actual_adapter = resolve_adapter_source(adapter_path, config.get("hf_adapter"))
@@ -373,8 +393,6 @@ def evaluate_seq2seq_model(config: dict, adapter_path: Path, val_pairs: List[Dic
     else:
         print(f"  [!] Warning: Adapter weights not found locally or on Hugging Face. Running base model.")
 
-    if device == "cuda":
-        model = model.cuda()
     model.eval()
     if hasattr(model, "generation_config") and model.generation_config is not None:
         model.generation_config.max_length = None
@@ -382,22 +400,29 @@ def evaluate_seq2seq_model(config: dict, adapter_path: Path, val_pairs: List[Dic
     prefix = config.get("prefix", "")
     predictions, references, latencies = [], [], []
 
+    gen_kwargs = {
+        "max_new_tokens": 64,
+        "num_beams": config["num_beams"],
+        "length_penalty": 1.0,
+        "no_repeat_ngram_size": 3,
+        "early_stopping": True,
+    }
+    if forced_bos_token_id is not None:
+        gen_kwargs["forced_bos_token_id"] = forced_bos_token_id
+
+    input_device = next(model.parameters()).device
+
     print(f"[3/3] Generating translations for {len(val_pairs)} samples (Beam Search = {config['num_beams']})...")
     for i, item in enumerate(val_pairs):
         input_text = prefix + item["source"]
         inputs = tokenizer(input_text, return_tensors="pt", max_length=128, truncation=True)
-        if device == "cuda":
-            inputs = {k: v.cuda() for k, v in inputs.items()}
+        inputs = {k: v.to(input_device) for k, v in inputs.items()}
 
         t0 = time.time()
         with torch.no_grad():
             outputs = model.generate(
                 **inputs,
-                max_new_tokens=64,
-                num_beams=config["num_beams"],
-                length_penalty=1.0,
-                no_repeat_ngram_size=3,
-                early_stopping=True,
+                **gen_kwargs,
             )
         latencies.append((time.time() - t0) * 1000)
 
@@ -450,8 +475,8 @@ def print_comparison_table(results: Dict[str, Dict]):
 
 def main():
     parser = argparse.ArgumentParser(description="Multi-Model Hinglish-to-English Benchmark on Google Colab GPU")
-    parser.add_argument("--model", type=str, choices=["all", "sarvam", "rlm", "mt5", "llama3"], default="all",
-                        help="Which model to evaluate ('all', 'sarvam', 'rlm', 'mt5', or 'llama3')")
+    parser.add_argument("--model", type=str, choices=["all", "sarvam", "rlm", "mt5", "nllb"], default="all",
+                        help="Which model to evaluate ('all', 'sarvam', 'rlm', 'mt5', or 'nllb')")
     parser.add_argument("--limit", type=int, default=150,
                         help="Number of validation samples to evaluate (default: 150 for quick test, 0 or 996 for full corpus)")
     parser.add_argument("--val_file", type=str, default=str(DEFAULT_VAL_FILE),
@@ -497,7 +522,7 @@ def main():
     print(f"[Dataset] Loaded {len(val_pairs)} validation sentence pairs from {val_file.name}")
 
     # 4. Models to evaluate
-    targets = ["sarvam", "mt5", "rlm", "llama3"] if args.model == "all" else [args.model]
+    targets = ["sarvam", "mt5", "rlm", "nllb"] if args.model == "all" else [args.model]
     all_results = {}
 
     for key in targets:

@@ -41,9 +41,9 @@ MODELS_TO_UPLOAD = [
         "desc": "Google mT5-Small LoRA Adapter for Romanized Hinglish-to-English NMT",
     },
     {
-        "local_dir": OUTPUTS_DIR / "llama3_hinglish_lora",
-        "repo_name": "llama-3-8b-hinglish-lora",
-        "desc": "Meta-Llama-3-8B QLoRA Adapter for Romanized Hinglish-to-English NMT",
+        "local_dir": OUTPUTS_DIR / "nllb_hinglish_lora",
+        "repo_name": "nllb-200-1.3b-hinglish-lora",
+        "desc": "NLLB-200 (1.3B) Seq2Seq LoRA Adapter for Romanized Hinglish-to-English NMT",
     },
 ]
 

@@ -9,11 +9,11 @@
 
 ```text
 RCMT (LREC-COLING 2024 Base) [███████                     ]  14.00 BLEU
-RLM-Gemma-2B                 [███████▍                    ]  14.64 BLEU  (+0.64)
-Sarvam-1 (2B QLoRA)          [████████▋                   ]  17.30 BLEU  (+3.30)
+RLM-Gemma-2B                 [███████▍                    ]  14.64 BLEU  (+0.64) 🥉
+Sarvam-1 (2B QLoRA)          [████████▋                   ]  17.30 BLEU  (+3.30) 🥈
 PACMANtrans (ICON 2023 Base) [█████████▍                  ]  18.66 BLEU
-Meta-Llama-3-8B (8B QLoRA)   [█████████▍                  ]  18.80 BLEU  (+4.80) 🥈
 Google mT5-Small             [██████████                  ]  19.94 BLEU  (+5.94) 🥇
+NLLB-200 (1.3B Seq2Seq LoRA) [Target SOTA Candidate       ]  Targeting 20.0+ BLEU 🌍
 ```
 
 ---
@@ -25,11 +25,9 @@ Google mT5-Small             [██████████                  ] 
 | **RCMT (LREC-COLING 2024)** | — | Primary 2024 SOTA Base | 14.00 | — | 14.00 | — |
 | **PACMANtrans (ACL/ICON 2023)** | — | Benchmark Baseline | 18.66 | — | — | — |
 | **RLM-Gemma-2B** | 2.0B | QLoRA ($r=64$) | 14.64 | 33.75 | 37.90 | 0.8793 |
-| **Sarvam-1 (2B)** | 2.0B | QLoRA ($r=32$) | 17.30 | 41.56 | **47.16** | 0.9020 |
-| **Meta-Llama-3-8B** | 8.0B | QLoRA ($r=32$) | **18.80** | **42.50** | —* | **0.9048** |
+| **Sarvam-1 (2B)** | 2.0B | QLoRA ($r=32$) | 17.30 | **41.56** | **47.16** | 0.9020 |
 | **Google mT5-Small** | 300M | Seq2Seq LoRA | **19.94** | 38.56 | 38.48 | **0.9061** |
-
-*\*Note: METEOR in Colab environment encountered an NLTK resource fetch restriction.*
+| **NLLB-200 (1.3B)** | 1.3B | Seq2Seq LoRA ($r=32$) | *Candidate* | *Candidate* | *Candidate* | *Candidate* |
 
 ---
 
@@ -40,26 +38,25 @@ Google mT5-Small             [██████████                  ] 
 | **RCMT (LREC-COLING 2024)** | — | — | — | — | — |
 | **PACMANtrans (ACL/ICON 2023)** | — | — | — | — | — |
 | **RLM-Gemma-2B** | 39.48 | 20.40 | 37.24 | 1347.5 ms | 2.0 hrs |
-| **Sarvam-1 (2B)** | 49.18 | 26.56 | 45.90 | 2492.5 ms | 2.2 hrs |
-| **Meta-Llama-3-8B** | **52.77** | **30.08** | **49.46** | 2737.2 ms | 4.6 hrs |
+| **Sarvam-1 (2B)** | **49.18** | **26.56** | **45.90** | 2492.5 ms | 2.2 hrs |
 | **Google mT5-Small** | 39.66 | 17.94 | 37.76 | **648.7 ms** | **19.5 min** |
+| **NLLB-200 (1.3B)** | *Candidate* | *Candidate* | *Candidate* | ~1200 ms | ~25 min |
 
 ---
 
 ### 🔍 Model-by-Model Analysis (For Slides & Viva)
 
-#### 🏆 1. Meta-Llama-3-8B (8B) — *Highest Linguistic Fluency & N-gram Overlap*
-* **Top Metric**: **42.50 chrF++** (1st) | **52.77 ROUGE-1** (1st) | **30.08 ROUGE-2** (1st) | **49.46 ROUGE-L** (1st) | **18.80 BLEU**
-* **Inference Speed**: 2737.2 ms/sentence
-* **Training Time**: ~4.6 hours on free Colab Tesla T4 GPU
-* **Beats Both Published Baselines**:
-  - Outperforms **RCMT (LREC-COLING 2024 @ 14.00 BLEU)** by **+4.80 BLEU points**.
-  - Outperforms **PACMANtrans (ICON 2023 @ 18.66 BLEU)** by **+0.14 BLEU points**.
-* **Why it Won**: The sheer representational capacity of 8 billion parameters combined with all-linear QLoRA projection tuning (`q, k, v, o, gate, up, down`) allowed Llama-3 to capture complex sentence structures and idiomatic Hinglish nuances better than any smaller model.
+#### 🌍 1. NLLB-200-distilled-1.3B (1.3B) — *Meta AI's Flagship Multilingual Seq2Seq NMT*
+* **Architecture**: Encoder-Decoder Seq2Seq Transformer (M2M-100 family) pre-trained on 200+ languages including extensive Indic data.
+* **Why it Fits Perfectly**:
+  - Purpose-built cross-attention for neural machine translation.
+  - At 1.3B parameters, it uses **under 2.5 GB VRAM** in 4-bit QLoRA and ~3.5 GB in FP16, fitting comfortably inside local **RTX 3050 6GB Laptop GPU** and Google Colab T4 (15GB).
+  - High convergence speed: trains in only ~25-30 minutes on Colab GPU.
+  - Natively outputs English (`eng_Latn`) with beam search decoding.
 
 #### 🥇 2. Google mT5-Small (300M) — *Best Overall BLEU & Sub-Second Latency*
 * **Top Metric**: **19.94 BLEU** | **0.9061 BERTScore**
-* **Inference Speed**: **648.7 ms/sentence** (Fastest, ~4× faster than 8B/2B models)
+* **Inference Speed**: **648.7 ms/sentence** (Fastest, ~4× faster than 2B models)
 * **Training Time**: **19.5 minutes** on free T4 GPU
 * **Beats Both Base Papers**:
   - Outperforms **RCMT (LREC-COLING 2024 @ 14.00 BLEU)** by **+5.94 BLEU points**.

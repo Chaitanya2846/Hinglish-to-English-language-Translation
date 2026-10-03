@@ -83,15 +83,17 @@ def main():
         )
 
     HF_REPO = "Nickhasntlost/sarvam-1-hinglish-lora"
-    has_local_weights = (
-        (ADAPTER_DIR / "adapter_model.safetensors").exists()
-        or (ADAPTER_DIR / "adapter_model.bin").exists()
+    has_local_weights = (ADAPTER_DIR / "adapter_config.json").is_file() and any(
+        (ADAPTER_DIR / filename).is_file()
+        for filename in ("adapter_model.safetensors", "adapter_model.bin")
     )
     if has_local_weights:
         print(f"[2/2] Attaching Fine-Tuned LoRA Adapter from {ADAPTER_DIR.name}...")
         model = PeftModel.from_pretrained(model, str(ADAPTER_DIR))
         print("  [+] LoRA Adapter attached successfully from local directory!")
     else:
+        if ADAPTER_DIR.exists():
+            print("  [!] Local adapter is incomplete (adapter weights are missing); using Hugging Face fallback.")
         print(f"[2/2] Attaching Fine-Tuned LoRA Adapter from Hugging Face ({HF_REPO})...")
         model = PeftModel.from_pretrained(model, HF_REPO)
         print("  [+] LoRA Adapter attached successfully from Hugging Face!")

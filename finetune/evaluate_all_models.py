@@ -70,13 +70,13 @@ MODELS = {
         "prefix": "translate Hinglish to English: ",
         "num_beams": 5,
     },
-    "Meta-Llama-3-8B (8B QLoRA)": {
-        "type": "causal",
-        "base": "meta-llama/Meta-Llama-3-8B",
-        "hf_adapter": "Nickhasntlost/llama-3-8b-hinglish-lora",
-        "adapter": SCRIPT_DIR / "outputs" / "llama3_hinglish_lora",
-        "prompt_template": "Translate the following Romanized Hinglish text to fluent English.\nHinglish: {source}\nEnglish:",
-        "extract_key": "English:",
+    "NLLB-200 (1.3B Seq2Seq LoRA)": {
+        "type": "seq2seq_nllb",
+        "base": "facebook/nllb-200-distilled-1.3B",
+        "hf_adapter": "Nickhasntlost/nllb-200-1.3b-hinglish-lora",
+        "adapter": SCRIPT_DIR / "outputs" / "nllb_hinglish_lora",
+        "src_lang": "hin_Deva",
+        "tgt_lang": "eng_Latn",
         "num_beams": 4,
     },
 }
@@ -202,8 +202,25 @@ def evaluate_seq2seq_model(config: dict, val_pairs: List[Dict], device: str) -> 
     from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
     from peft import PeftModel
 
-    tokenizer = AutoTokenizer.from_pretrained(config["base"])
-    model = AutoModelForSeq2SeqLM.from_pretrained(config["base"], torch_dtype=torch.float32)
+    tok_kwargs = {}
+    if config.get("src_lang"):
+        tok_kwargs["src_lang"] = config["src_lang"]
+    if config.get("tgt_lang"):
+        tok_kwargs["tgt_lang"] = config["tgt_lang"]
+    tokenizer = AutoTokenizer.from_pretrained(config["base"], **tok_kwargs)
+
+    forced_bos_token_id = None
+    if config.get("tgt_lang"):
+        forced_bos_token_id = tokenizer.convert_tokens_to_ids(config["tgt_lang"])
+
+    if "nllb" in config["base"].lower() and device == "cuda":
+        from transformers import BitsAndBytesConfig
+        bnb_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.float16)
+        model = AutoModelForSeq2SeqLM.from_pretrained(config["base"], quantization_config=bnb_config, device_map="auto")
+    else:
+        model = AutoModelForSeq2SeqLM.from_pretrained(config["base"], torch_dtype=torch.float32)
+        if device == "cuda":
+            model = model.cuda()
 
     adapter_path = Path(config["adapter"])
     actual_adapter = None
@@ -222,22 +239,30 @@ def evaluate_seq2seq_model(config: dict, val_pairs: List[Dict], device: str) -> 
     else:
         print(f"  [!] No adapter found at {adapter_path} or on Hugging Face, using base model")
 
-    if device == "cuda":
-        model = model.cuda()
     model.eval()
 
     prefix = config.get("prefix", "")
     predictions, references, latencies = [], [], []
 
+    gen_kwargs = {
+        "max_new_tokens": 96,
+        "num_beams": config["num_beams"],
+        "length_penalty": 1.0,
+        "no_repeat_ngram_size": 3,
+        "early_stopping": True,
+    }
+    if forced_bos_token_id is not None:
+        gen_kwargs["forced_bos_token_id"] = forced_bos_token_id
+
+    input_device = next(model.parameters()).device
+
     for i, item in enumerate(val_pairs):
         input_text = prefix + item["source"]
         inputs = tokenizer(input_text, return_tensors="pt", max_length=128, truncation=True)
-        if device == "cuda":
-            inputs = {k: v.cuda() for k, v in inputs.items()}
+        inputs = {k: v.to(input_device) for k, v in inputs.items()}
         t0 = time.time()
         with torch.no_grad():
-            outputs = model.generate(**inputs, max_new_tokens=96, num_beams=config["num_beams"],
-                length_penalty=1.0, no_repeat_ngram_size=3, early_stopping=True)
+            outputs = model.generate(**inputs, **gen_kwargs)
         latencies.append((time.time() - t0) * 1000)
         pred = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
         predictions.append(pred)
