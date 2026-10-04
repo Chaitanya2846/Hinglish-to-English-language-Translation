@@ -135,6 +135,8 @@ class NLLBTranslator:
             print("      Running NLLB-200 base zero-shot translation mode.\n")
 
         self.model.eval()
+        if hasattr(self.model, "generation_config") and self.model.generation_config is not None:
+            self.model.generation_config.max_length = None
         print(f"  [+] Ready in {time.time() - t0:.1f}s!\n")
 
     def translate(self, text: str, num_beams: int = 4) -> dict:

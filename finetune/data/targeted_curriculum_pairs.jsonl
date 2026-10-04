@@ -1,0 +1,50 @@
+{"source": "model kii accuracy kaam kyu hori haii", "target": "why is the accuracy of the model decreasing"}
+{"source": "model ki accuracy kam kyu ho rahi hai", "target": "why is the accuracy of the model decreasing"}
+{"source": "accuracy kam kyu ho rahi hai", "target": "why is the accuracy decreasing"}
+{"source": "training loss kam ho raha hai ya nahi", "target": "is the training loss decreasing or not"}
+{"source": "mere marks kam aaye hai", "target": "my marks are low"}
+{"source": "uske paas time kam hai", "target": "he has less time"}
+{"source": "paise kam pad rahe hai", "target": "money is falling short"}
+{"source": "speed kam kar do thoda", "target": "decrease the speed a little"}
+{"source": "aaj kaam bohot zyada hai", "target": "there is a lot of work today"}
+{"source": "yeh kaam jaldi khatam karo", "target": "finish this work quickly"}
+{"source": "aaj mausam kitna badhiya hai", "target": "how wonderful the weather is today"}
+{"source": "aaj ka mausam bohot badhiya hai", "target": "today weather is very pleasant"}
+{"source": "yeh idea sach me bohot badhiya hai", "target": "this idea is really very great"}
+{"source": "sab kuch badhiya chal raha hai", "target": "everything is going great"}
+{"source": "khana bohot badiya bana hai", "target": "the food is made very nicely"}
+{"source": "badhiya kaam kiya tumne bhai", "target": "you did a great job brother"}
+{"source": "result bohot badhiya aaya hai", "target": "the result has come out very good"}
+{"source": "mausam badhiya hai", "target": "the weather is wonderful"}
+{"source": "udhar pencil haii", "target": "the pencil is over there"}
+{"source": "udhar pencil rakhi hai", "target": "the pencil is kept over there"}
+{"source": "udhar mat jao", "target": "do not go over there"}
+{"source": "meri book udhar table par hai", "target": "my book is over there on the table"}
+{"source": "idhar aao aur udhar dekho", "target": "come here and look over there"}
+{"source": "usne mujhse udhaar paise liye the", "target": "he had borrowed money from me"}
+{"source": "kya mujhe udhaar mil sakta hai", "target": "can i get a loan"}
+{"source": "bag udhar kone me rakha hai", "target": "the bag is kept over there in the corner"}
+{"source": "aajj model chalne mai bohot timee lagra haii hope soo sridhar kee samne chal jayee", "target": "today the model is taking a lot of time to run, hope so it works in front of Sridhar"}
+{"source": "model chalne me bohot time lag raha hai", "target": "the model is taking a lot of time to run"}
+{"source": "umeed hai ki model sridhar sir ke samne chal jaye", "target": "hope that the model works in front of Sridhar sir"}
+{"source": "code theek se chal raha hai", "target": "the code is running properly"}
+{"source": "kya script chal gayi", "target": "did the script run successfully"}
+{"source": "laptop par program nahi chal raha", "target": "the program is not running on the laptop"}
+{"source": "hamara project demo me achhe se chal gaya", "target": "our project ran well in the demo"}
+{"source": "server theek se chal raha hai", "target": "the server is running fine"}
+{"source": "wifi nahi chal raha hai", "target": "the wifi is not working"}
+{"source": "Kal subah jaldi nikalna hai, toh please mujhe time par jagah dena.", "target": "i have to leave early tomorrow morning, so please wake me up on time."}
+{"source": "mujhe kal subah jaldi jaga dena", "target": "wake me up early tomorrow morning"}
+{"source": "please mujhe time par jaga dena", "target": "please wake me up on time"}
+{"source": "subah chhe baje mujhe utha dena", "target": "wake me up at six in the morning"}
+{"source": "kal presentation hai toh time par utha dena", "target": "tomorrow is the presentation so wake me up on time"}
+{"source": "sridhar sir bohot aacha padhate haii", "target": "sridhar sir teaches very well"}
+{"source": "sir aap bohot achha padhate ho", "target": "sir you teach very well"}
+{"source": "kyaa sridhar sir hamara project accept kerege", "target": "will sridhar sir accept our project"}
+{"source": "ajj nlp course project kaa presentation hai", "target": "today is the presentation of the nlp course project"}
+{"source": "kya tum roll no 41 see jyada marks laa sakte ho", "target": "can you score more marks than roll no 41"}
+{"source": "sir attendance de do please", "target": "sir please give attendance"}
+{"source": "viva me kya sawal poochenge sir", "target": "what questions will sir ask in the viva"}
+{"source": "project submission ka last date kab hai", "target": "when is the last date for project submission"}
+{"source": "hamara presentation bohot accha gaya", "target": "our presentation went very well"}
+{"source": "kya chal raha hai bhai", "target": "what is going on brother"}

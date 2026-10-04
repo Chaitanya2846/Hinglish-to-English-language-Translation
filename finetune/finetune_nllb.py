@@ -122,6 +122,8 @@ def evaluate_model(
 ) -> Tuple[Dict[str, float], List[str]]:
     """Evaluates the model on validation sample pairs using beam search."""
     model.eval()
+    if hasattr(model, "generation_config") and model.generation_config is not None:
+        model.generation_config.max_length = None
     samples = eval_pairs[:num_samples]
     predictions, references, latencies = [], [], []
 
