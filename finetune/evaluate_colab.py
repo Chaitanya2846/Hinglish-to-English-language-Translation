@@ -183,7 +183,7 @@ MODEL_CONFIGS = {
         "base": "facebook/nllb-200-distilled-1.3B",
         "hf_adapter": "Nickhasntlost/nllb-200-1.3b-hinglish-lora",
         "adapter_rel": "nllb_hinglish_lora",
-        "src_lang": "hin_Deva",
+        "src_lang": "eng_Latn",
         "tgt_lang": "eng_Latn",
         "num_beams": 4,
         "trust_remote_code": False,

@@ -45,7 +45,7 @@ DATA_DIR = SCRIPT_DIR / "data"
 OUTPUT_DIR = SCRIPT_DIR / "outputs" / "nllb_hinglish_lora"
 
 DEFAULT_BASE_MODEL = "facebook/nllb-200-distilled-1.3B"
-SRC_LANG = "hin_Deva"
+SRC_LANG = "eng_Latn"
 TGT_LANG = "eng_Latn"
 
 
@@ -209,10 +209,10 @@ class Seq2SeqCollatorWithDecoderIds(DataCollatorForSeq2Seq):
 def main():
     parser = argparse.ArgumentParser(description="Fine-Tuning for facebook/nllb-200-distilled-1.3B on Hinglish Translation")
     parser.add_argument("--base_model", type=str, default=DEFAULT_BASE_MODEL, help="Base HuggingFace repo")
-    parser.add_argument("--epochs", type=int, default=3, help="Training epochs (default: 3)")
-    parser.add_argument("--batch_size", type=int, default=4, help="Per-device train batch size (default: 4)")
-    parser.add_argument("--grad_accum", type=int, default=4, help="Gradient accumulation steps (default: 4)")
-    parser.add_argument("--lr", type=float, default=2e-4, help="Learning rate (default: 2e-4)")
+    parser.add_argument("--epochs", type=int, default=5, help="Training epochs (default: 5)")
+    parser.add_argument("--batch_size", type=int, default=8, help="Per-device train batch size (default: 8)")
+    parser.add_argument("--grad_accum", type=int, default=2, help="Gradient accumulation steps (default: 2)")
+    parser.add_argument("--lr", type=float, default=2.5e-4, help="Learning rate (default: 2.5e-4)")
     parser.add_argument("--lora_r", type=int, default=32, help="LoRA rank dimension (default: 32)")
     parser.add_argument("--lora_alpha", type=int, default=64, help="LoRA alpha scaling factor (default: 64)")
     parser.add_argument("--max_length", type=int, default=128, help="Max sequence length (default: 128)")
@@ -343,8 +343,8 @@ def main():
 
     # 4. LoRA Setup
     print(f"\n[4/5] Injecting LoRA Adapter (r={args.lora_r}, alpha={args.lora_alpha})...")
-    # All projection matrices in encoder and decoder multi-head attention
-    target_modules = ["q_proj", "v_proj", "k_proj", "out_proj"]
+    # All projection matrices in encoder and decoder multi-head attention + MLP feed-forward
+    target_modules = ["q_proj", "v_proj", "k_proj", "out_proj", "fc1", "fc2"]
 
     lora_config = LoraConfig(
         r=args.lora_r,

@@ -36,7 +36,7 @@ DEFAULT_ADAPTER_DIR = SCRIPT_DIR / "outputs" / "nllb_hinglish_lora"
 DEFAULT_BASE_MODEL = "facebook/nllb-200-distilled-1.3B"
 HF_FALLBACK_REPO = "Nickhasntlost/nllb-200-1.3b-hinglish-lora"
 
-SRC_LANG = "hin_Deva"
+SRC_LANG = "eng_Latn"
 TGT_LANG = "eng_Latn"
 
 

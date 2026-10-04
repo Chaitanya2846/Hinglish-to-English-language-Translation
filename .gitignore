@@ -55,6 +55,7 @@ models/*checkpoint*/
 **/tokenizer.json
 finetune/outputs/**/README.md
 finetune/outputs/**/*.jinja
+finetune/outputs/
 
 # Archives
 *.zip
