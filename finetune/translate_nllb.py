@@ -129,6 +129,15 @@ class NLLBTranslator:
                 print("  [+] LoRA Adapter successfully mounted!")
             except Exception as e:
                 print(f"  [!] Notice: Could not attach adapter ({e}). Running base model.")
+        elif HF_FALLBACK_REPO:
+            try:
+                print(f"  Attaching Fine-Tuned LoRA Adapter from Hugging Face ({HF_FALLBACK_REPO})...", flush=True)
+                self.model = PeftModel.from_pretrained(self.model, HF_FALLBACK_REPO)
+                print("  [+] LoRA Adapter successfully mounted from Hugging Face!")
+            except Exception as e:
+                print(f"  [i] Notice: Could not attach Hugging Face adapter ({e}).")
+                print(f"      (Run 'python finetune/finetune_nllb.py' to train locally).")
+                print("      Running NLLB-200 base zero-shot translation mode.\n")
         else:
             print("  [i] Notice: No local LoRA adapter found yet.")
             print(f"      (Run 'python finetune/finetune_nllb.py' to train the Hinglish adapter).")
